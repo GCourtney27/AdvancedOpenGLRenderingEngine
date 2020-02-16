@@ -1,0 +1,356 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FFECE1E0-3F6A-3B1F-B6C0-AAF47BA4EB81}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2 -BC:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/build --check-stamp-file C:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.15\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindDoxygen.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\WriteBasicConfigVersionFile.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeCCompiler.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeRCCompiler.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeSystem.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\cmake_uninstall.cmake.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw3.pc.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw3Config.cmake.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw_config.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2 -BC:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/build --check-stamp-file C:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.15\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindDoxygen.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\WriteBasicConfigVersionFile.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeCCompiler.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeRCCompiler.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeSystem.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\cmake_uninstall.cmake.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw3.pc.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw3Config.cmake.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw_config.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2 -BC:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/build --check-stamp-file C:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.15\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindDoxygen.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\WriteBasicConfigVersionFile.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeCCompiler.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeRCCompiler.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeSystem.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\cmake_uninstall.cmake.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw3.pc.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw3Config.cmake.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw_config.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2 -BC:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/build --check-stamp-file C:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.15\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindDoxygen.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.15\Modules\WriteBasicConfigVersionFile.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeCCompiler.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeRCCompiler.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\3.15.4\CMakeSystem.cmake;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\cmake_uninstall.cmake.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw3.pc.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw3Config.cmake.in;C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\src\glfw_config.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\ZERO_CHECK.vcxproj">
+      <Project>{1C25F885-453A-3B42-A2E0-F695AD3ED1F1}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\examples\boing.vcxproj">
+      <Project>{436492EF-70B2-339E-96EF-B1266E9BB0D6}</Project>
+      <Name>boing</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\clipboard.vcxproj">
+      <Project>{FA7160BC-7990-3C10-8692-634C1FFE216F}</Project>
+      <Name>clipboard</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\cursor.vcxproj">
+      <Project>{C8B4BDD2-7B22-3199-A452-0A07524085CB}</Project>
+      <Name>cursor</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\empty.vcxproj">
+      <Project>{ABE51492-B73B-3D78-8BD5-4FE9A79FD3C3}</Project>
+      <Name>empty</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\events.vcxproj">
+      <Project>{E01AF665-E6D2-3F50-8D8C-B271B876FF6B}</Project>
+      <Name>events</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\gamma.vcxproj">
+      <Project>{13FA8293-5BC6-380E-B8B8-15CF107E3D73}</Project>
+      <Name>gamma</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\examples\gears.vcxproj">
+      <Project>{11D20A11-C66E-30A2-B814-D0247D3D9AFF}</Project>
+      <Name>gears</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\src\glfw.vcxproj">
+      <Project>{BD425149-2843-3440-96C0-2BA6236C66EB}</Project>
+      <Name>glfw</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\glfwinfo.vcxproj">
+      <Project>{FF43C26B-A7A6-3A54-8982-A54592CDCAE6}</Project>
+      <Name>glfwinfo</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\examples\heightmap.vcxproj">
+      <Project>{5929B560-991B-3BA8-9F29-99ADAEB9CF75}</Project>
+      <Name>heightmap</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\icon.vcxproj">
+      <Project>{B63C0B51-0F85-3E9F-AAE8-5F2BA81978FB}</Project>
+      <Name>icon</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\iconify.vcxproj">
+      <Project>{B77B659B-EC44-35F3-817D-A3393902B928}</Project>
+      <Name>iconify</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\inputlag.vcxproj">
+      <Project>{37FDD14C-99DC-36E9-B805-1588079107FA}</Project>
+      <Name>inputlag</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\joysticks.vcxproj">
+      <Project>{FEC64225-5C2C-3794-A654-E172E8FD3625}</Project>
+      <Name>joysticks</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\monitors.vcxproj">
+      <Project>{BA607BD2-F75D-3B92-B210-9FEE8A0D1C53}</Project>
+      <Name>monitors</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\msaa.vcxproj">
+      <Project>{E82D9948-75E0-3286-87B9-BD023F898077}</Project>
+      <Name>msaa</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\examples\offscreen.vcxproj">
+      <Project>{8F25D579-75CD-3D3D-86FF-F0B32B29819F}</Project>
+      <Name>offscreen</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\opacity.vcxproj">
+      <Project>{B069F00B-E5DF-3FCD-9B79-6D14D7C41550}</Project>
+      <Name>opacity</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\examples\particles.vcxproj">
+      <Project>{B0732E63-8665-347E-B3BF-C9443E7385AB}</Project>
+      <Name>particles</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\reopen.vcxproj">
+      <Project>{544A90E2-1131-3849-8D42-C2620D701C48}</Project>
+      <Name>reopen</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\examples\sharing.vcxproj">
+      <Project>{59A2BC17-B3F7-372F-915C-3BEEF8E8008A}</Project>
+      <Name>sharing</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\examples\simple.vcxproj">
+      <Project>{465D0236-F44C-3D1C-B6EB-CEFD4D232922}</Project>
+      <Name>simple</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\examples\splitview.vcxproj">
+      <Project>{32C12EEC-EA6F-355E-883F-77897900FDEF}</Project>
+      <Name>splitview</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\tearing.vcxproj">
+      <Project>{797AE62C-4382-3C25-8A57-593C51AA594C}</Project>
+      <Name>tearing</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\threads.vcxproj">
+      <Project>{3C5E941E-AE06-3CB8-A8BA-A2C2D09FD51C}</Project>
+      <Name>threads</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\timeout.vcxproj">
+      <Project>{B70EBC00-63CB-302F-8987-BD12E5785F82}</Project>
+      <Name>timeout</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\title.vcxproj">
+      <Project>{E06F0CC2-F4E2-3F06-B866-07F4CE8A5CF2}</Project>
+      <Name>title</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\triangle-vulkan.vcxproj">
+      <Project>{3FE89B42-3AF9-38F7-B689-F10CD39CB057}</Project>
+      <Name>triangle-vulkan</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\examples\wave.vcxproj">
+      <Project>{386FFB62-104E-33FD-8D75-53A2F4EA48B5}</Project>
+      <Name>wave</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\windows.vcxproj">
+      <Project>{A0657011-487E-37D5-8D85-8C9A35128454}</Project>
+      <Name>windows</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

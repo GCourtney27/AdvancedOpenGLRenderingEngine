@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Vendor\glad\src\glad.c">
+      <Filter>Resources\GLAD</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Source.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Shaders.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Geometry\Mesh.cpp">
+      <Filter>Source\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Geometry\Model.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Vendor\stb\stb_image.h">
+      <Filter>Resources\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Camera\Camera.h">
+      <Filter>Headers\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Lights\Lights.h">
+      <Filter>Headers\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Geometry\Mesh.h">
+      <Filter>Headers\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Geometry\Model.h">
+      <Filter>Headers\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\Shaders.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\VertexShader.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\FragmentShader.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\lamp.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\lamp.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\ModelLoading.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\ModelLoading.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{6f72facf-61e8-461a-b23b-3f20d2c68a09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{79e3ff29-0ddf-45f6-b8de-b6391a5265a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{6faf0e26-27fc-4729-9e53-ca1edfb0bbaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders">
+      <UniqueIdentifier>{b6a2afcf-98c9-4598-873f-6adb8d0d0500}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\GLAD">
+      <UniqueIdentifier>{5a68bcbb-8978-458a-b167-c67d4b1db395}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\stb">
+      <UniqueIdentifier>{6a854a08-5d11-430b-b393-543315d18f45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Objects">
+      <UniqueIdentifier>{c3348af9-9208-45fc-943a-64d60058c36b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Graphics">
+      <UniqueIdentifier>{656db956-ddf2-488a-859f-cc874c50f265}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Objects">
+      <UniqueIdentifier>{5b2f5dea-114f-4f3f-94f1-ab933956242e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Graphics">
+      <UniqueIdentifier>{4eb0d6e6-65aa-40ac-b310-16bde1ce4171}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

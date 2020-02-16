@@ -1,0 +1,5 @@
+﻿  Building Custom Rule C:/VSDev/ComputerGraphics/OpenGLRenderingEngine_VS2019/OpenGLRenderingEngine_VS2019/Vendors/glfw-3.3.2/tests/CMakeLists.txt
+  triangle-vulkan.c
+  glad_vulkan.c
+  Generating Code...
+  triangle-vulkan.vcxproj -> C:\VSDev\ComputerGraphics\OpenGLRenderingEngine_VS2019\OpenGLRenderingEngine_VS2019\Vendors\glfw-3.3.2\build\tests\Release\triangle-vulkan.exe
