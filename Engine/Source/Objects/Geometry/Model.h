@@ -7,11 +7,12 @@
 class Model
 {
 public:
-	Model(char* path)
+	Model(const std::string& path)
 	{
 		LoadModel(path);
 	}
 	void Draw(Shader shader);
+	void Destroy();
 
 private:
 	std::vector<Mesh> meshes;

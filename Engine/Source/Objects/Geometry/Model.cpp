@@ -120,3 +120,9 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial * mat, aiTextureType
 
 	return textures;
 }
+
+void Model::Destroy()
+{
+	for (unsigned int i = 0; i < meshes.size(); i++)
+		meshes[i].Destroy();
+}
