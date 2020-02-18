@@ -39,6 +39,7 @@ void Mesh::SetupMesh()
 
 void Mesh::Draw(Shader& shader)
 {
+	// Set texture uniforms
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
 	for (unsigned int i = 0; i < textures.size(); i++)
@@ -54,12 +55,14 @@ void Mesh::Draw(Shader& shader)
 		shader.SetFloat(("material." + name + number).c_str(), i);
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
-	glActiveTexture(GL_TEXTURE0);
+	shader.SetFloat("material.shininess", 32.0f);
 
 	// Draw
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indicies.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+
+	glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::Destroy()

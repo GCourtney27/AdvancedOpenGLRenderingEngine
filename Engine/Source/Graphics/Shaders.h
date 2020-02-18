@@ -3,7 +3,6 @@
 #define SHADER_H
 
 #include <glad/glad.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -11,6 +10,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+
+#include "..\Objects\Lights\Lights.h"
 
 class Shader
 {
@@ -31,6 +32,9 @@ public:
 	void SetVec3(const std::string & name, float x, float y, float z) const;
 	void SetVec3(const std::string & name, glm::vec3 value) const;
 
+	void SetPointLight(const std::string & name, PointLight light);
+	void SetDirectionalLight(const std::string & name, DirectionalLight light);
+	void SetSpotLight(const std::string & name, SpotLight light);
 };
 
 #endif
