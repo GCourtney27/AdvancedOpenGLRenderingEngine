@@ -91,6 +91,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Graphics\Shaders.h" />
+    <ClInclude Include="Source\Graphics\Texture.h" />
+    <ClInclude Include="Source\Graphics\Vertex.h" />
     <ClInclude Include="Source\Objects\Camera\Camera.h" />
     <ClInclude Include="Source\Objects\Geometry\Model.h" />
     <ClInclude Include="Source\Objects\Lights\Lights.h" />

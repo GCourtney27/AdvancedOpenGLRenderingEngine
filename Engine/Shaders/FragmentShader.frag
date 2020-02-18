@@ -47,7 +47,7 @@ struct PointLight
 };
 
 uniform DirectionalLight dirLight;
-#define NUM_POINT_LIGHTS 4
+#define NUM_POINT_LIGHTS 1
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
 uniform SpotLight spotLight;
 uniform Material material;

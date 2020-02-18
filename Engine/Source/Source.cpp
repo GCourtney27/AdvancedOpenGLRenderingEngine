@@ -5,6 +5,7 @@
 
 #include "Objects/Geometry/Model.h"
 #include "Objects/Camera/Camera.h"
+#include "Objects/Lights/Lights.h"
 
 #define ThrowError(x) throw std::runtime_error(x)
 
@@ -76,6 +77,9 @@ glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.0f,  0.0f, -3.0f)
 };
 
+PointLight pointLight;
+SpotLight spotLight;
+DirectionalLight dirLight;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = g_windowWidth / 2.0f;
 float lastY = g_windowHeight / 2.0f;
@@ -123,11 +127,37 @@ int main()
 
 	glViewport(0, 0, g_windowWidth, g_windowHeight);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_STENCIL_TEST);
+	glStencilMask(0x00);
+
+	// Create new frame buffer
+	unsigned int fbo;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	unsigned int fboTexture;
+	glGenTextures(1, &fboTexture);
+	glBindTexture(GL_TEXTURE_2D, fboTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, g_windowWidth, g_windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
+
 
 	// Compile shaders
-	Shader ourShader("Shaders/ModelLoading.vert", "Shaders/ModelLoading.frag");
+	Shader lightingShader("Shaders/VertexShader.vert", "Shaders/FragmentShader.frag");
+	Shader lampShader("Shaders/lamp.vert", "Shaders/lamp.frag");
 	
-	Model ourModel("../Assets/Models/nanosuit/nanosuit.obj");
+	Model model("../Assets/Models/nanosuit/nanosuit.obj");
+	Model light("../Assets/Models/Primatives/Cube.obj");
+
+	pointLight.ambient = glm::vec3(0.05f);
+	pointLight.diffuse = glm::vec3(0.8f);
+	pointLight.specular = glm::vec3(1.0f);
+	pointLight.linear = 0.09f;
+	pointLight.quadratic = 0.032f;
 
 	while (!glfwWindowShouldClose(pWindow))
 	{
@@ -138,28 +168,36 @@ int main()
 		ProcessInput(pWindow);
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		ourShader.Use();
+		lightingShader.Use();
 
 		// view/projection transformations
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)g_windowWidth / (float)g_windowHeight, 0.1f, 100.0f);
-		glm::mat4 view = camera.GetViewMatrix();
-		ourShader.SetMat4("projection", projection);
-		ourShader.SetMat4("view", view);
-		ourShader.SetVec3("vewPos", camera.Position);
+		glm::mat4 projectionMat = glm::perspective(glm::radians(camera.Zoom), (float)g_windowWidth / (float)g_windowHeight, 0.1f, 100.0f);
+		glm::mat4 viewMat = camera.GetViewMatrix();
+		lightingShader.SetMat4("projection", projectionMat);
+		lightingShader.SetMat4("view", viewMat);
+		lightingShader.SetVec3("vewPos", camera.Position);
+
+		spotLight.position = camera.Position;
+		spotLight.direction = camera.Front;
+
+		lightingShader.SetPointLight("pointLights[0]", pointLight);
+		lightingShader.SetDirectionalLight("dirLight", dirLight);
+		lightingShader.SetSpotLight("spotLight", spotLight);
 
 		// render the loaded model
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
-		ourShader.SetMat4("model", model);
-		ourModel.Draw(ourShader);
-		
+		glm::mat4 modelMat = glm::mat4(1.0f);
+		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -1.75f, 0.0f));
+		//model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));
+		lightingShader.SetMat4("model", modelMat);
+		model.Draw(lightingShader);
+
+
 		glfwSwapBuffers(pWindow);
 		glfwPollEvents();
 	}
-	ourModel.Destroy();
+	model.Destroy();
 
 	glfwTerminate();
 	return 0;
@@ -207,19 +245,24 @@ void ProcessInput(GLFWwindow* pWindow)
 	if (glfwGetKey(pWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(pWindow, true);
 
-	if (glfwGetKey(pWindow, GLFW_KEY_W) == GLFW_PRESS)
-		camera.ProcessKeyboard(FORWARD, g_deltaTime);
-	if (glfwGetKey(pWindow, GLFW_KEY_S) == GLFW_PRESS)
-		camera.ProcessKeyboard(BACKWARD, g_deltaTime);
-	if (glfwGetKey(pWindow, GLFW_KEY_A) == GLFW_PRESS)
-		camera.ProcessKeyboard(LEFT, g_deltaTime);
-	if (glfwGetKey(pWindow, GLFW_KEY_D) == GLFW_PRESS)
-		camera.ProcessKeyboard(RIGHT, g_deltaTime);
-	if (glfwGetKey(pWindow, GLFW_KEY_E) == GLFW_PRESS)
-		camera.ProcessKeyboard(UP, g_deltaTime);
-	if (glfwGetKey(pWindow, GLFW_KEY_Q) == GLFW_PRESS)
-		camera.ProcessKeyboard(DOWN, g_deltaTime);
+	float camSpeedScale = 1.0f;
+	if (glfwGetKey(pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		camSpeedScale = 3.0f;
 
+	if (glfwGetKey(pWindow, GLFW_KEY_W) == GLFW_PRESS)
+		camera.ProcessKeyboard(FORWARD, g_deltaTime * camSpeedScale);
+	if (glfwGetKey(pWindow, GLFW_KEY_S) == GLFW_PRESS)
+		camera.ProcessKeyboard(BACKWARD, g_deltaTime * camSpeedScale);
+	if (glfwGetKey(pWindow, GLFW_KEY_A) == GLFW_PRESS)
+		camera.ProcessKeyboard(LEFT, g_deltaTime * camSpeedScale);
+	if (glfwGetKey(pWindow, GLFW_KEY_D) == GLFW_PRESS)
+		camera.ProcessKeyboard(RIGHT, g_deltaTime * camSpeedScale);
+	if (glfwGetKey(pWindow, GLFW_KEY_E) == GLFW_PRESS)
+		camera.ProcessKeyboard(UP, g_deltaTime * camSpeedScale);
+	if (glfwGetKey(pWindow, GLFW_KEY_Q) == GLFW_PRESS)
+		camera.ProcessKeyboard(DOWN, g_deltaTime * camSpeedScale);
+	if (glfwGetKey(pWindow, GLFW_KEY_C) == GLFW_PRESS)
+		pointLight.position = camera.Position;
 
 }
 
