@@ -51,7 +51,9 @@ uniform DirectionalLight dirLight;
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
 uniform SpotLight spotLight;
 uniform Material material;
+
 uniform vec3 viewPos;
+uniform samplerCube skybox;
 
 in vec2 TexCoords;
 in vec3 FragPos;
@@ -73,6 +75,17 @@ void main()
     }    
 
 	result += CalculateSpotLight(spotLight, normal, FragPos, viewDirection);
+
+	// Reflection
+	vec3 I = normalize(FragPos - viewPos);
+	vec3 R = reflect(I, normalize(Normal));
+	result += texture(skybox, R).rgb;
+
+	// Refraction
+//	float ratio = 1.0 / 1.52;
+//	vec3 I = normalize(FragPos - viewPos);
+//	vec3 R = refract(I, normalize(Normal), ratio);
+//	result += texture(skybox, R).rgb;
 
     FragColor = vec4(result, 1.0);
 }

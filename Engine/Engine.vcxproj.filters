@@ -60,6 +60,10 @@
     <None Include="Shaders\ModelLoading.vert">
       <Filter>Resources\Shaders</Filter>
     </None>
+    <None Include="Shaders\RenderToTexture.vert" />
+    <None Include="Shaders\RenderToTexture.frag" />
+    <None Include="Shaders\Skybox.vert" />
+    <None Include="Shaders\Skybox.frag" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
