@@ -3,14 +3,18 @@
 #include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 #include "Objects/Geometry/Model.h"
 #include "Objects/Camera/Camera.h"
 #include "Objects/Lights/Lights.h"
 
 #define ThrowError(x) throw std::runtime_error(x)
 
-int g_windowWidth = 800;
-int g_windowHeight = 600;
+int g_windowWidth = 1600;
+int g_windowHeight = 900;
 
 float vertices[] = {
 	// positions          // normals           // texture coords
@@ -175,7 +179,14 @@ int main()
 	glfwSetCursorPosCallback(pWindow, mouse_callback);
 	glfwSetScrollCallback(pWindow, scroll_callback);
 
-	glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	gladLoadGL();
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(pWindow, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -259,6 +270,16 @@ int main()
 	pointLight.linear = 0.09f;
 	pointLight.quadratic = 0.032f;
 
+	bool postProcessEnabled = true;
+
+	bool filmGrainEnabled = true;
+	float filmgrainStrength = 16.0f;
+
+	bool vignetteEnabled = true;
+	float vignetteInnerRadius = 0.1;
+	float vignetteOuterRadius = 1.0;
+	float vignetteOpacity = 1.0;
+
 	while (!glfwWindowShouldClose(pWindow))
 	{
 		float currentTime = static_cast<float>(glfwGetTime());
@@ -266,8 +287,6 @@ int main()
 		g_lastFrame = currentTime;
 
 		ProcessInput(pWindow);
-
-		
 
 		// First pass
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -277,7 +296,10 @@ int main()
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		// view/projection transformations
 		glm::mat4 projectionMat = glm::perspective(glm::radians(camera.Zoom), (float)g_windowWidth / (float)g_windowHeight, 0.1f, 100.0f);
 		glm::mat4 viewMat = camera.GetViewMatrix();
@@ -287,8 +309,8 @@ int main()
 		lightingShader.SetMat4("view", viewMat);
 		lightingShader.SetVec3("viewPos", camera.Position);
 
-		spotLight.position = camera.Position;
-		spotLight.direction = camera.Front;
+		spotLight.position = glm::vec3(0.0f, 3.0f, 0.0f);
+		spotLight.direction = glm::vec3(0.0f, -1.0f, 0.0f);
 
 		lightingShader.SetPointLight("pointLights[0]", pointLight);
 		lightingShader.SetDirectionalLight("dirLight", dirLight);
@@ -321,15 +343,48 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		screenShader.Use();
+		screenShader.SetFloat("Time", glfwGetTime());
+
+		ImGui::Begin("Post Processing");
+		{
+			ImGui::Text("Film Grain");
+			ImGui::Checkbox("Enabled", &filmGrainEnabled);
+			ImGui::DragFloat("Strength", &filmgrainStrength, 0.1f, 0.0f, 80.0f);
+
+
+			ImGui::Text("Vignette");
+			ImGui::Checkbox("Enabled", &vignetteEnabled);
+			ImGui::DragFloat("Inner Radius", &vignetteInnerRadius, 0.1f, 0.0f, 10.0f);
+			ImGui::DragFloat("Outer Radius", &vignetteOuterRadius, 0.1f, 0.0f, 10.0f);
+			ImGui::DragFloat("Opacity", &vignetteOpacity, 0.1f, 0.0f, 10.0f);
+		}
+		ImGui::End();
+		screenShader.SetFloat("filmgrainEnabled", filmGrainEnabled);
+		screenShader.SetFloat("grainStrength", filmgrainStrength);
+
+		screenShader.SetFloat("vignetteEnabled", vignetteEnabled);
+		screenShader.SetFloat("vignetteInnerRadius", vignetteInnerRadius);
+		screenShader.SetFloat("vignetteOuterRadius", vignetteOuterRadius);
+		screenShader.SetFloat("vignetteOpacity", vignetteOpacity);
+
 		glBindVertexArray(quadVAO);
 		glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		glfwSwapBuffers(pWindow);
 		glfwPollEvents();
 	}
 	model.Destroy();
+
 	glDeleteVertexArrays(1, &quadVAO);
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
 	glfwTerminate();
 	return 0;
 }
@@ -433,8 +488,11 @@ void frame_buffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-void mouse_callback(GLFWwindow * window, double xpos, double ypos)
+void mouse_callback(GLFWwindow * pWindow, double xpos, double ypos)
 {
+	if (glfwGetMouseButton(pWindow, GLFW_MOUSE_BUTTON_RIGHT) != GLFW_PRESS)
+		return;
+	
 	if (g_firstMouse)
 	{
 		lastX = static_cast<float>(xpos);

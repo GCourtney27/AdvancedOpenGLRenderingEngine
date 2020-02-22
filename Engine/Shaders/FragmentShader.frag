@@ -77,15 +77,15 @@ void main()
 	result += CalculateSpotLight(spotLight, normal, FragPos, viewDirection);
 
 	// Reflection
-	vec3 I = normalize(FragPos - viewPos);
-	vec3 R = reflect(I, normalize(Normal));
-	result += texture(skybox, R).rgb;
+//	vec3 I = normalize(FragPos - viewPos);
+//	vec3 R = reflect(I, normalize(Normal));
+//	result += texture(skybox, R).rgb;
 
 	// Refraction
-//	float ratio = 1.0 / 1.52;
-//	vec3 I = normalize(FragPos - viewPos);
-//	vec3 R = refract(I, normalize(Normal), ratio);
-//	result += texture(skybox, R).rgb;
+	float ratio = 1.0 / 1.52;
+	vec3 I = normalize(FragPos - viewPos);
+	vec3 R = refract(I, normalize(Normal), ratio);
+	result += texture(skybox, R).rgb;
 
     FragColor = vec4(result, 1.0);
 }

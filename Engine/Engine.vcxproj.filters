@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Vendor\glad\src\glad.c">
-      <Filter>Resources\GLAD</Filter>
+      <Filter>Vendor\GLAD</Filter>
     </ClCompile>
     <ClCompile Include="Source\Source.cpp">
       <Filter>Source</Filter>
@@ -13,7 +13,27 @@
     <ClCompile Include="Source\Objects\Geometry\Mesh.cpp">
       <Filter>Source\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Objects\Geometry\Model.cpp" />
+    <ClCompile Include="Vendor\imgui\imgui.cpp">
+      <Filter>Vendor\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendor\imgui\imgui_demo.cpp">
+      <Filter>Vendor\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendor\imgui\imgui_draw.cpp">
+      <Filter>Vendor\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendor\imgui\imgui_impl_glfw.cpp">
+      <Filter>Vendor\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendor\imgui\imgui_widgets.cpp">
+      <Filter>Vendor\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Geometry\Model.cpp">
+      <Filter>Vendor\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendor\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Vendor\ImGui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vendor\stb\stb_image.h">
@@ -40,6 +60,30 @@
     <ClInclude Include="Source\Graphics\Vertex.h">
       <Filter>Headers\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Vendor\imgui\imconfig.h">
+      <Filter>Vendor\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\imgui\imgui.h">
+      <Filter>Vendor\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\imgui\imgui_impl_glfw.h">
+      <Filter>Vendor\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\imgui\imgui_internal.h">
+      <Filter>Vendor\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\imgui\imstb_rectpack.h">
+      <Filter>Vendor\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\imgui\imstb_textedit.h">
+      <Filter>Vendor\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\imgui\imstb_truetype.h">
+      <Filter>Vendor\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\imgui\imgui_impl_opengl3.h">
+      <Filter>Vendor\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\VertexShader.vert">
@@ -60,10 +104,18 @@
     <None Include="Shaders\ModelLoading.vert">
       <Filter>Resources\Shaders</Filter>
     </None>
-    <None Include="Shaders\RenderToTexture.vert" />
-    <None Include="Shaders\RenderToTexture.frag" />
-    <None Include="Shaders\Skybox.vert" />
-    <None Include="Shaders\Skybox.frag" />
+    <None Include="Shaders\RenderToTexture.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\RenderToTexture.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\Skybox.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\Skybox.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -77,9 +129,6 @@
     </Filter>
     <Filter Include="Resources\Shaders">
       <UniqueIdentifier>{b6a2afcf-98c9-4598-873f-6adb8d0d0500}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resources\GLAD">
-      <UniqueIdentifier>{5a68bcbb-8978-458a-b167-c67d4b1db395}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resources\stb">
       <UniqueIdentifier>{6a854a08-5d11-430b-b393-543315d18f45}</UniqueIdentifier>
@@ -95,6 +144,15 @@
     </Filter>
     <Filter Include="Source\Graphics">
       <UniqueIdentifier>{4eb0d6e6-65aa-40ac-b310-16bde1ce4171}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vendor">
+      <UniqueIdentifier>{751b0264-b3c9-492f-9b13-df0c13682f46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vendor\ImGui">
+      <UniqueIdentifier>{ba2d3147-f850-4385-a526-551400b0895e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vendor\GLAD">
+      <UniqueIdentifier>{5a68bcbb-8978-458a-b167-c67d4b1db395}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

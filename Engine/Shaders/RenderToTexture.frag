@@ -7,24 +7,36 @@ uniform sampler2D screenTexture;
 
 const float offset = 1.0 / 300.0;
 
+uniform bool postProcessEnabled;
+
+uniform float Time;
+
+// Film Grain
+uniform float filmgrainEnabled;
+uniform float grainStrength;
+
 // Vignette
-const float vignetteInnerRadius = 0.1;
-const float vignetteOuterRadius = 1.0;
-const float vignetteOpacity = 1.0;
+uniform float vignetteEnabled;
+uniform float vignetteInnerRadius;
+uniform float vignetteOuterRadius;
+uniform float vignetteOpacity;
+
+vec4 GetTextureColor();
+
+vec4 AddVignette();
+vec4 AddFilmGrain();
 
 void main()
 {
-	vec2 centerUV = TexCoords - vec2(0.5);
-	vec4 sourceColor = texture(screenTexture, TexCoords);
-	vec4 color = vec4(1.0);
+	vec4 result;
 
-	// Vignette
-	color.rgb *= 1.0 - smoothstep(vignetteInnerRadius, vignetteOuterRadius, length(centerUV));
-	color *= sourceColor;
-	color = mix(sourceColor, color, vignetteOpacity);
-
-	FragColor = color;
+	result += AddVignette() * vignetteEnabled;
+	result += AddFilmGrain() * filmgrainEnabled;
+	//result += GetTextureColor();
+	
+	FragColor = result;
 	return;
+
 	// Inverted colors
 //	FragColor = vec4(vec3(1.0 - texture(screenTexture, TexCoords)), 1.0);
 
@@ -67,4 +79,33 @@ void main()
 		col += sampleTex[i] * kernal[i];
 
 	FragColor = vec4(col, 1.0);
+}
+
+vec4 GetTextureColor()
+{
+	return texture(screenTexture, TexCoords);
+}
+
+vec4 AddFilmGrain()
+{
+	vec4 color = GetTextureColor();
+
+	float x = (TexCoords.x + 4.0 ) * (TexCoords.y + 4.0 ) * (Time * 10.0);
+	vec4 grain = vec4(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01)-0.005) * grainStrength;
+    
+    grain = 1.0 - grain;
+	return grain * color;
+}
+
+vec4 AddVignette()
+{
+	vec2 centerUV = TexCoords - vec2(0.5);
+	vec4 sourceColor = GetTextureColor();
+	vec4 color = vec4(1.0);
+
+	// Vignette
+	color.rgb *= 1.0 - smoothstep(vignetteInnerRadius, vignetteOuterRadius, length(centerUV));
+	color *= sourceColor;
+	color = mix(sourceColor, color, vignetteOpacity);
+	return color;
 }
