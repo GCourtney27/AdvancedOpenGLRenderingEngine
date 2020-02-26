@@ -258,7 +258,7 @@ int main()
 	// Compile shaders
 	Shader lightingShader("Shaders/VertexShader.vert", "Shaders/FragmentShader.frag");
 	Shader lampShader("Shaders/lamp.vert", "Shaders/lamp.frag");
-	Shader screenShader("Shaders/RenderToTexture.vert", "Shaders/RenderToTexture.frag");
+	Shader screenShader("Shaders/ScreenQuadPostProcess.vert", "Shaders/ScreenQuadPostProcess.frag");
 	Shader skyboxShader("Shaders/Skybox.vert", "Shaders/Skybox.frag");
 	
 	Model model("../Assets/Models/nanosuit/nanosuit.obj");

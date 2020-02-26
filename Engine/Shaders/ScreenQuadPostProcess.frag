@@ -1,7 +1,10 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec2 TexCoords;
+in VS_OUT 
+{
+	vec2 TexCoords;
+} fs_in;
 
 uniform sampler2D screenTexture;
 
@@ -40,10 +43,10 @@ void main()
 	return;
 
 	// Inverted colors
-//	FragColor = vec4(vec3(1.0 - texture(screenTexture, TexCoords)), 1.0);
+//	FragColor = vec4(vec3(1.0 - texture(screenTexture, fs_in.TexCoords)), 1.0);
 
 	// Grey Scale
-//	FragColor = texture(screenTexture, TexCoords);
+//	FragColor = texture(screenTexture, fs_in.TexCoords);
 //	float average = (0.2126 * FragColor.r + 0.7152 * FragColor.g + 0.0722 * FragColor.g) / 3.0;
 //	FragColor = vec4(average, average, average, 1.0);
 
@@ -74,7 +77,7 @@ void main()
 	vec3 sampleTex[9];
 	for(int i = 0; i < 9; i++)
 	{
-		sampleTex[i] = vec3(texture(screenTexture, TexCoords.st + offsets[i]));
+		sampleTex[i] = vec3(texture(screenTexture, fs_in.TexCoords.st + offsets[i]));
 	}
 	vec3 col = vec3(0.0);
 	for(int i = 0; i < 9; i++)
@@ -85,13 +88,13 @@ void main()
 
 vec4 GetTextureColor()
 {
-	return texture(screenTexture, TexCoords);
+	return texture(screenTexture, fs_in.TexCoords);
 }
 
 vec4 AddFilmGrain(vec4 sourceColor)
 {
 
-	float x = (TexCoords.x + 4.0 ) * (TexCoords.y + 4.0 ) * (Time * 10.0);
+	float x = (fs_in.TexCoords.x + 4.0 ) * (fs_in.TexCoords.y + 4.0 ) * (Time * 10.0);
 	vec4 grain = vec4(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01)-0.005) * grainStrength;
     
     grain = 1.0 - grain;
@@ -100,7 +103,7 @@ vec4 AddFilmGrain(vec4 sourceColor)
 
 vec4 AddVignette(vec4 sourceColor)
 {
-	vec2 centerUV = TexCoords - vec2(0.5);
+	vec2 centerUV = fs_in.TexCoords - vec2(0.5);
 	vec4 color = vec4(1.0);
 
 	// Vignette

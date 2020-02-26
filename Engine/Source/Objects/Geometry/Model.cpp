@@ -1,5 +1,11 @@
 #include "Model.h"
 
+Model::Model(const std::string & path)
+{
+	LoadModel(path);
+
+}
+
 void Model::Draw(Shader shader)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
