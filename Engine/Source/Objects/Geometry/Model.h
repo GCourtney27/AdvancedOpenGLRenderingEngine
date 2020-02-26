@@ -7,10 +7,8 @@
 class Model
 {
 public:
-	Model(const std::string& path)
-	{
-		LoadModel(path);
-	}
+	Model(const std::string& path);
+	
 	void Draw(Shader shader);
 	void Destroy();
 
