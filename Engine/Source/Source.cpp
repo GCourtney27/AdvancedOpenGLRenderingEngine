@@ -348,17 +348,18 @@ int main()
 		ImGui::Begin("Post Processing");
 		{
 			ImGui::Text("Film Grain");
-			ImGui::Checkbox("Enabled", &filmGrainEnabled);
+			ImGui::Checkbox("FG Enabled", &filmGrainEnabled);
 			ImGui::DragFloat("Strength", &filmgrainStrength, 0.1f, 0.0f, 80.0f);
 
 
 			ImGui::Text("Vignette");
-			ImGui::Checkbox("Enabled", &vignetteEnabled);
+			ImGui::Checkbox("VN Enabled", &vignetteEnabled);
 			ImGui::DragFloat("Inner Radius", &vignetteInnerRadius, 0.1f, 0.0f, 10.0f);
 			ImGui::DragFloat("Outer Radius", &vignetteOuterRadius, 0.1f, 0.0f, 10.0f);
 			ImGui::DragFloat("Opacity", &vignetteOpacity, 0.1f, 0.0f, 10.0f);
 		}
 		ImGui::End();
+	
 		screenShader.SetFloat("filmgrainEnabled", filmGrainEnabled);
 		screenShader.SetFloat("grainStrength", filmgrainStrength);
 
@@ -366,7 +367,7 @@ int main()
 		screenShader.SetFloat("vignetteInnerRadius", vignetteInnerRadius);
 		screenShader.SetFloat("vignetteOuterRadius", vignetteOuterRadius);
 		screenShader.SetFloat("vignetteOpacity", vignetteOpacity);
-
+		
 		glBindVertexArray(quadVAO);
 		glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
 		glDrawArrays(GL_TRIANGLES, 0, 6);

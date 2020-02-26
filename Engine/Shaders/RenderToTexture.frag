@@ -23,17 +23,19 @@ uniform float vignetteOpacity;
 
 vec4 GetTextureColor();
 
-vec4 AddVignette();
-vec4 AddFilmGrain();
+vec4 AddVignette(vec4 sourceColor);
+vec4 AddFilmGrain(vec4 sourceColor);
 
 void main()
 {
-	vec4 result;
+	vec4 texColor = GetTextureColor();
 
-	result += AddVignette() * vignetteEnabled;
-	result += AddFilmGrain() * filmgrainEnabled;
-	//result += GetTextureColor();
+	vec4 result = texColor;
+	// Simple arithmetic logic gate to replace if statements. GPUs dont like breaking control flow with ifs
+	result = AddFilmGrain(result) * filmgrainEnabled + result * (1 - filmgrainEnabled);
+	result = AddVignette(result) * vignetteEnabled + result * (1 - vignetteEnabled);
 	
+
 	FragColor = result;
 	return;
 
@@ -86,26 +88,25 @@ vec4 GetTextureColor()
 	return texture(screenTexture, TexCoords);
 }
 
-vec4 AddFilmGrain()
+vec4 AddFilmGrain(vec4 sourceColor)
 {
-	vec4 color = GetTextureColor();
 
 	float x = (TexCoords.x + 4.0 ) * (TexCoords.y + 4.0 ) * (Time * 10.0);
 	vec4 grain = vec4(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01)-0.005) * grainStrength;
     
     grain = 1.0 - grain;
-	return grain * color;
+	return grain * sourceColor;
 }
 
-vec4 AddVignette()
+vec4 AddVignette(vec4 sourceColor)
 {
 	vec2 centerUV = TexCoords - vec2(0.5);
-	vec4 sourceColor = GetTextureColor();
 	vec4 color = vec4(1.0);
 
 	// Vignette
 	color.rgb *= 1.0 - smoothstep(vignetteInnerRadius, vignetteOuterRadius, length(centerUV));
 	color *= sourceColor;
 	color = mix(sourceColor, color, vignetteOpacity);
+
 	return color;
 }
