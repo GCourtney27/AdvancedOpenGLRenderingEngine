@@ -61,6 +61,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -114,13 +115,16 @@
     <ClInclude Include="Vendor\stb\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\GPUGeometry.frag" />
+    <None Include="Shaders\GPUGeometry.geom" />
+    <None Include="Shaders\GPUGeometry.vert" />
     <None Include="Shaders\lamp.frag" />
     <None Include="Shaders\lamp.vert" />
     <None Include="Shaders\FragmentShader.frag" />
     <None Include="Shaders\ModelLoading.frag" />
     <None Include="Shaders\ModelLoading.vert" />
-    <None Include="Shaders\RenderToTexture.vert" />
-    <None Include="Shaders\RenderToTexture.frag" />
+    <None Include="Shaders\ScreenQuadPostProcess.vert" />
+    <None Include="Shaders\ScreenQuadPostProcess.frag" />
     <None Include="Shaders\Skybox.frag" />
     <None Include="Shaders\Skybox.vert" />
     <None Include="Shaders\VertexShader.vert" />

@@ -19,7 +19,8 @@ public:
 	unsigned int ProgramID;
 
 	// Constructor reads and builds the shader
-	Shader(const char * vertexPath, const char * fragmentPath);
+	Shader(const char * vertexPath, const char * fragmentPath, const char * geometryPath = "");
+	~Shader();
 
 	// Use/Activate the shader
 	void Use();

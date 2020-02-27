@@ -74,6 +74,13 @@ glm::vec3 cubePositions[] = {
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 };
 
+float points[] = {
+	-0.5f,  0.5f, // top-left
+	 0.5f,  0.5f, // top-right
+	 0.5f, -0.5f, // bottom-right
+	-0.5f, -0.5f  // bottom-left
+};
+
 float skyboxVertices[] = {
 	// positions          
 
@@ -196,7 +203,7 @@ int main()
 
 	glViewport(0, 0, g_windowWidth, g_windowHeight);
 
-	// Skybox VAO
+	// Skybox VAO/VBO
 	unsigned int skyboxVAO, skyboxVBO;
 	glGenVertexArrays(1, &skyboxVAO);
 	glGenBuffers(1, &skyboxVBO);
@@ -206,8 +213,17 @@ int main()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+	// Geometry Shader VAO/VBO
+	unsigned int geometryVAO, geometryVBO;
+	glGenVertexArrays(1, &geometryVAO);
+	glGenBuffers(1, &geometryVBO);
+	glBindVertexArray(geometryVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, geometryVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 
-	// screen quad VAO
+	// screen quad VAO/VBO
 	unsigned int quadVAO, quadVBO;
 	glGenVertexArrays(1, &quadVAO);
 	glGenBuffers(1, &quadVBO);
@@ -260,7 +276,22 @@ int main()
 	Shader lampShader("Shaders/lamp.vert", "Shaders/lamp.frag");
 	Shader screenShader("Shaders/ScreenQuadPostProcess.vert", "Shaders/ScreenQuadPostProcess.frag");
 	Shader skyboxShader("Shaders/Skybox.vert", "Shaders/Skybox.frag");
+	Shader geometryShader("Shaders/GPUGeometry.vert", "Shaders/GPUGeometry.frag", "Shaders/GPUGeometry.geom");
+
+	unsigned int ubiLightingShader = glGetUniformBlockIndex(lightingShader.ProgramID, "Matrices");
+	glUniformBlockBinding(lightingShader.ProgramID, ubiLightingShader, 0);
+	unsigned int uboMatrices;
+	glGenBuffers(1, &uboMatrices);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
+	glm::mat4 projectionMat = glm::perspective(glm::radians(camera.Zoom), (float)g_windowWidth / (float)g_windowHeight, 0.1f, 100.0f);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projectionMat));
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	
+
 	Model model("../Assets/Models/nanosuit/nanosuit.obj");
 	Model light("../Assets/Models/Primatives/Cube.obj");
 
@@ -276,9 +307,9 @@ int main()
 	float filmgrainStrength = 16.0f;
 
 	bool vignetteEnabled = true;
-	float vignetteInnerRadius = 0.1;
-	float vignetteOuterRadius = 1.0;
-	float vignetteOpacity = 1.0;
+	float vignetteInnerRadius = 0.1f;
+	float vignetteOuterRadius = 1.0f;
+	float vignetteOpacity = 1.0f;
 
 	while (!glfwWindowShouldClose(pWindow))
 	{
@@ -300,9 +331,11 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		// view/projection transformations
-		glm::mat4 projectionMat = glm::perspective(glm::radians(camera.Zoom), (float)g_windowWidth / (float)g_windowHeight, 0.1f, 100.0f);
+		// view transformations
 		glm::mat4 viewMat = camera.GetViewMatrix();
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewMat));
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 			   
 		lightingShader.Use();
 		lightingShader.SetMat4("projection", projectionMat);
@@ -336,6 +369,11 @@ int main()
 		glBindVertexArray(0);
 		glDepthFunc(GL_LESS);
 
+		// Render GPU geometry
+		geometryShader.Use();
+		glBindVertexArray(geometryVAO);
+		glDrawArrays(GL_POINTS, 0, 4);
+
 		// Second (PostProcess) pass
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glDisable(GL_DEPTH_TEST);
@@ -343,7 +381,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		screenShader.Use();
-		screenShader.SetFloat("Time", glfwGetTime());
+		screenShader.SetFloat("Time", (float)glfwGetTime());
 
 		ImGui::Begin("Post Processing");
 		{

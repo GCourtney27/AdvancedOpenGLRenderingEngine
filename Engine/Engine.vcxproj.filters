@@ -104,16 +104,25 @@
     <None Include="Shaders\ModelLoading.vert">
       <Filter>Resources\Shaders</Filter>
     </None>
-    <None Include="Shaders\RenderToTexture.frag">
-      <Filter>Resources\Shaders</Filter>
-    </None>
-    <None Include="Shaders\RenderToTexture.vert">
-      <Filter>Resources\Shaders</Filter>
-    </None>
     <None Include="Shaders\Skybox.frag">
       <Filter>Resources\Shaders</Filter>
     </None>
     <None Include="Shaders\Skybox.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\ScreenQuadPostProcess.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\ScreenQuadPostProcess.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\GPUGeometry.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\GPUGeometry.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\GPUGeometry.geom">
       <Filter>Resources\Shaders</Filter>
     </None>
   </ItemGroup>
