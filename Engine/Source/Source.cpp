@@ -15,7 +15,7 @@
 
 int g_windowWidth = 1600;
 int g_windowHeight = 900;
-
+int g_msaaSamples = 4;
 float vertices[] = {
 	// positions          // normals           // texture coords
 	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
@@ -75,10 +75,10 @@ glm::vec3 cubePositions[] = {
 };
 
 float points[] = {
-	-0.5f,  0.5f, // top-left
-	 0.5f,  0.5f, // top-right
-	 0.5f, -0.5f, // bottom-right
-	-0.5f, -0.5f  // bottom-left
+	-0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
+	 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
+	 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
+	-0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
 };
 
 float skyboxVertices[] = {
@@ -171,6 +171,8 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+	glfwWindowHint(GLFW_SAMPLES, g_msaaSamples);
 
 	GLFWwindow* pWindow = glfwCreateWindow(g_windowWidth, g_windowHeight, "OpenGL Engine!", NULL, NULL);
 	if (pWindow == nullptr)
@@ -200,6 +202,7 @@ int main()
 		ThrowError("Failed to initialize GLAD!");
 		return -1;
 	}
+	glEnable(GL_MULTISAMPLE);
 
 	glViewport(0, 0, g_windowWidth, g_windowHeight);
 
@@ -221,7 +224,9 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, geometryVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
 
 	// screen quad VAO/VBO
 	unsigned int quadVAO, quadVBO;
@@ -235,29 +240,45 @@ int main()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-	// Create new frame buffer
+	// Create msaa buffer
 	unsigned int frameBuffer;
 	glGenFramebuffers(1, &frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	// Create the texture color buffer
-	unsigned int textureColorBuffer;
-	glGenTextures(1, &textureColorBuffer);
-	glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, g_windowWidth, g_windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorBuffer, 0);
-	// Create a render buffer
+	unsigned int textureColorBufferMultiSampled;
+	glGenTextures(1, &textureColorBufferMultiSampled);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureColorBufferMultiSampled);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, g_msaaSamples, GL_RGB, g_windowWidth, g_windowHeight, GL_TRUE);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, textureColorBufferMultiSampled, 0);
+	// Create render buffer
 	unsigned int rbo;
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, g_windowWidth, g_windowHeight);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, g_msaaSamples, GL_DEPTH24_STENCIL8, g_windowWidth, g_windowHeight);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		ThrowError("ERROR::FRAMEBUFFER::Framebuffer is not complete!");
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Create post process screen buffer we need to reate a regular texture to ba able to apply it to the screen quad in the shader
+	unsigned int intermediateFBO;
+	glGenFramebuffers(1, &intermediateFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, intermediateFBO);
+	unsigned int screenTexture;
+	glGenTextures(1, &screenTexture);
+	glBindTexture(GL_TEXTURE_2D, screenTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, g_windowWidth, g_windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!\n";
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Shader screenShader("Shaders/ScreenQuadPostProcess.vert", "Shaders/ScreenQuadPostProcess.frag");
+	screenShader.SetInt("screenTexture", 0);
 
 	// Create cube map
 	std::vector<std::string> faces{
@@ -274,7 +295,6 @@ int main()
 	// Compile shaders
 	Shader lightingShader("Shaders/VertexShader.vert", "Shaders/FragmentShader.frag");
 	Shader lampShader("Shaders/lamp.vert", "Shaders/lamp.frag");
-	Shader screenShader("Shaders/ScreenQuadPostProcess.vert", "Shaders/ScreenQuadPostProcess.frag");
 	Shader skyboxShader("Shaders/Skybox.vert", "Shaders/Skybox.frag");
 	Shader geometryShader("Shaders/GPUGeometry.vert", "Shaders/GPUGeometry.frag", "Shaders/GPUGeometry.geom");
 
@@ -375,6 +395,10 @@ int main()
 		glDrawArrays(GL_POINTS, 0, 4);
 
 		// Second (PostProcess) pass
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+		glBlitFramebuffer(0, 0, g_windowWidth, g_windowHeight, 0, 0, g_windowWidth, g_windowHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glDisable(GL_DEPTH_TEST);
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -382,7 +406,6 @@ int main()
 
 		screenShader.Use();
 		screenShader.SetFloat("Time", (float)glfwGetTime());
-
 		ImGui::Begin("Post Processing");
 		{
 			ImGui::Text("Film Grain");
@@ -407,7 +430,8 @@ int main()
 		screenShader.SetFloat("vignetteOpacity", vignetteOpacity);
 		
 		glBindVertexArray(quadVAO);
-		glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, screenTexture);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		
 		ImGui::Render();
