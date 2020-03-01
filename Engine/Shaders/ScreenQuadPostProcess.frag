@@ -12,7 +12,7 @@ const float offset = 1.0 / 300.0;
 
 uniform bool postProcessEnabled;
 
-uniform float Time;
+uniform float time;
 
 // Film Grain
 uniform float filmgrainEnabled;
@@ -38,7 +38,6 @@ void main()
 	result = AddFilmGrain(result) * filmgrainEnabled + result * (1 - filmgrainEnabled);
 	result = AddVignette(result) * vignetteEnabled + result * (1 - vignetteEnabled);
 	
-
 	FragColor = result;
 	return;
 
@@ -94,7 +93,7 @@ vec4 GetTextureColor()
 vec4 AddFilmGrain(vec4 sourceColor)
 {
 
-	float x = (fs_in.TexCoords.x + 4.0 ) * (fs_in.TexCoords.y + 4.0 ) * (Time * 10.0);
+	float x = (fs_in.TexCoords.x + 4.0 ) * (fs_in.TexCoords.y + 4.0 ) * (time * 10.0);
 	vec4 grain = vec4(mod((mod(x, 13.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.01)-0.005) * grainStrength;
     
     grain = 1.0 - grain;

@@ -138,6 +138,17 @@ float quadVertices[] = { // vertex attributes for a quad that fills the entire s
 		 1.0f,  1.0f,  1.0f, 1.0f
 };
 
+float planeVertices[] = {
+	// positions            // normals         // texcoords
+	 10.0f, -0.5f,  10.0f,  0.0f, -1.0f, 0.0f,  10.0f,  0.0f,
+	-10.0f, -0.5f,  10.0f,  0.0f, -1.0f, 0.0f,   0.0f,  0.0f,
+	-10.0f, -0.5f, -10.0f,  0.0f, -1.0f, 0.0f,   0.0f, 10.0f,
+
+	 10.0f, -0.5f,  10.0f,  0.0f, -1.0f, 0.0f,  10.0f,  0.0f,
+	-10.0f, -0.5f, -10.0f,  0.0f, -1.0f, 0.0f,   0.0f, 10.0f,
+	 10.0f, -0.5f, -10.0f,  0.0f, -1.0f, 0.0f,  10.0f, 10.0f
+};
+
 glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.7f,  0.2f,  2.0f),
 	glm::vec3(2.3f, -3.3f, -4.0f),
@@ -153,6 +164,9 @@ float lastX = g_windowWidth / 2.0f;
 float lastY = g_windowHeight / 2.0f;
 bool g_firstMouse = true;
 
+bool gammaEnabled = false;
+bool gammaKeyPressed = false;
+
 float g_deltaTime = 0.0f; // Time between current frame and last frame
 float g_lastFrame = 0.0f; // Time of last frame
 
@@ -162,7 +176,7 @@ void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 unsigned int loadCubeMap(std::vector<std::string> faces);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-unsigned int loadTexture(char const * path);
+unsigned int loadTexture(char const * path, bool gammaCorrection);
 void ProcessInput(GLFWwindow* pWindow);
 
 int main()
@@ -227,6 +241,21 @@ int main()
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	// plane VAO
+	unsigned int planeVAO, planeVBO;
+	glGenVertexArrays(1, &planeVAO);
+	glGenBuffers(1, &planeVBO);
+	glBindVertexArray(planeVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glBindVertexArray(0);
 
 	// screen quad VAO/VBO
 	unsigned int quadVAO, quadVBO;
@@ -311,6 +340,9 @@ int main()
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projectionMat));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	
+	unsigned int floorTexture = loadTexture("../Assets/Textures/wood.png", false);
+	unsigned int floorTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Diff.png", true);
+	unsigned int floorSpecTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Spec.png", true);
 
 	Model model("../Assets/Models/nanosuit/nanosuit.obj");
 	Model light("../Assets/Models/Primatives/Cube.obj");
@@ -331,6 +363,8 @@ int main()
 	float vignetteOuterRadius = 1.0f;
 	float vignetteOpacity = 1.0f;
 
+	float delta = 64.0f;
+	
 	while (!glfwWindowShouldClose(pWindow))
 	{
 		float currentTime = static_cast<float>(glfwGetTime());
@@ -362,7 +396,7 @@ int main()
 		lightingShader.SetMat4("view", viewMat);
 		lightingShader.SetVec3("viewPos", camera.Position);
 
-		spotLight.position = glm::vec3(0.0f, 3.0f, 0.0f);
+		spotLight.position = glm::vec3(0.0f, -2.0f, 0.0f);
 		spotLight.direction = glm::vec3(0.0f, -1.0f, 0.0f);
 
 		lightingShader.SetPointLight("pointLights[0]", pointLight);
@@ -377,6 +411,25 @@ int main()
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 		model.Draw(lightingShader);
 
+		// floor
+		glm::mat4 floorMat = glm::mat4(1.0f);
+		floorMat = glm::scale(floorMat, glm::vec3(2.0f));
+		floorMat = glm::rotate(floorMat, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		floorMat = glm::translate(floorMat, glm::vec3(0.0f, 1.5f, 0.0f));
+		ImGui::Begin("Material shininess");
+		{
+			ImGui::DragFloat("Shininess", &delta, 1.0f, 0.0f, 200.0f);
+			lightingShader.SetFloat("material.shininess", delta);
+		}
+		ImGui::End();
+		lightingShader.SetMat4("model", floorMat);
+		glBindVertexArray(planeVAO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, floorTextureGammaCorrected);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, floorSpecTextureGammaCorrected);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
 		// Draw skybox
 		glDepthFunc(GL_LEQUAL);
 		skyboxShader.Use();
@@ -390,9 +443,9 @@ int main()
 		glDepthFunc(GL_LESS);
 
 		// Render GPU geometry
-		geometryShader.Use();
-		glBindVertexArray(geometryVAO);
-		glDrawArrays(GL_POINTS, 0, 4);
+		//geometryShader.Use();
+		//glBindVertexArray(geometryVAO);
+		//glDrawArrays(GL_POINTS, 0, 4);
 
 		// Second (PostProcess) pass
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBuffer);
@@ -405,7 +458,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		screenShader.Use();
-		screenShader.SetFloat("Time", (float)glfwGetTime());
+		screenShader.SetFloat("time", (float)glfwGetTime());
 		ImGui::Begin("Post Processing");
 		{
 			ImGui::Text("Film Grain");
@@ -452,7 +505,7 @@ int main()
 	return 0;
 }
 
-unsigned int loadTexture(char const * path)
+unsigned int loadTexture(char const * path, bool gammaCorrection)
 {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -461,16 +514,25 @@ unsigned int loadTexture(char const * path)
 	unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
 	if (data)
 	{
-		GLenum format;
+		GLenum internalFormat;
+		GLenum dataFormat;
 		if (nrComponents == 1)
-			format = GL_RED;
+		{
+			internalFormat = dataFormat = GL_RED;
+		}
 		else if (nrComponents == 3)
-			format = GL_RGB;
+		{
+			internalFormat = gammaCorrection ? GL_SRGB : GL_RGB;
+			dataFormat = GL_RGB;
+		}
 		else if (nrComponents == 4)
-			format = GL_RGBA;
+		{
+			internalFormat = gammaCorrection ? GL_SRGB_ALPHA : GL_RGBA;
+			dataFormat = GL_RGBA;
+		}
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -543,6 +605,12 @@ void ProcessInput(GLFWwindow* pWindow)
 		camera.ProcessKeyboard(DOWN, g_deltaTime * camSpeedScale);
 	if (glfwGetKey(pWindow, GLFW_KEY_C) == GLFW_PRESS)
 		pointLight.position = camera.Position;
+
+	if (glfwGetKey(pWindow, GLFW_KEY_SPACE) == GLFW_PRESS && !gammaKeyPressed)
+	{
+		gammaEnabled = !gammaEnabled;
+		gammaKeyPressed = true;
+	}
 
 }
 
