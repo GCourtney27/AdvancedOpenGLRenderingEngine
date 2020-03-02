@@ -12,6 +12,10 @@
 #include "Objects/Lights/Lights.h"
 
 #define ThrowError(x) throw std::runtime_error(x)
+#define IMGUI_NEW_FRAME \
+ImGui_ImplOpenGL3_NewFrame();\
+ImGui_ImplGlfw_NewFrame();\
+ImGui::NewFrame();\
 
 int g_windowWidth = 1600;
 int g_windowHeight = 900;
@@ -140,13 +144,13 @@ float quadVertices[] = { // vertex attributes for a quad that fills the entire s
 
 float planeVertices[] = {
 	// positions            // normals         // texcoords
-	 10.0f, -0.5f,  10.0f,  0.0f, -1.0f, 0.0f,  10.0f,  0.0f,
-	-10.0f, -0.5f,  10.0f,  0.0f, -1.0f, 0.0f,   0.0f,  0.0f,
-	-10.0f, -0.5f, -10.0f,  0.0f, -1.0f, 0.0f,   0.0f, 10.0f,
+	 25.0f, -0.5f,  25.0f,  0.0f, -1.0f, 0.0f,  25.0f,  0.0f,
+	-25.0f, -0.5f,  25.0f,  0.0f, -1.0f, 0.0f,   0.0f,  0.0f,
+	-25.0f, -0.5f, -25.0f,  0.0f, -1.0f, 0.0f,   0.0f, 25.0f,
 
-	 10.0f, -0.5f,  10.0f,  0.0f, -1.0f, 0.0f,  10.0f,  0.0f,
-	-10.0f, -0.5f, -10.0f,  0.0f, -1.0f, 0.0f,   0.0f, 10.0f,
-	 10.0f, -0.5f, -10.0f,  0.0f, -1.0f, 0.0f,  10.0f, 10.0f
+	 25.0f, -0.5f,  25.0f,  0.0f, -1.0f, 0.0f,  25.0f,  0.0f,
+	-25.0f, -0.5f, -25.0f,  0.0f, -1.0f, 0.0f,   0.0f, 25.0f,
+	 25.0f, -0.5f, -25.0f,  0.0f, -1.0f, 0.0f,  25.0f, 25.0f
 };
 
 glm::vec3 pointLightPositions[] = {
@@ -160,6 +164,12 @@ PointLight pointLight;
 SpotLight spotLight;
 DirectionalLight dirLight;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+unsigned int planeVAO, planeVBO;
+unsigned int floorTextureGammaCorrected;
+unsigned int floorSpecTextureGammaCorrected;
+Model model;
+unsigned int cubemapTexture;
+
 float lastX = g_windowWidth / 2.0f;
 float lastY = g_windowHeight / 2.0f;
 bool g_firstMouse = true;
@@ -178,6 +188,8 @@ unsigned int loadCubeMap(std::vector<std::string> faces);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 unsigned int loadTexture(char const * path, bool gammaCorrection);
 void ProcessInput(GLFWwindow* pWindow);
+void RenderScene(const Shader& shader);
+void renderCube();
 
 int main()
 {
@@ -243,7 +255,6 @@ int main()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
 
 	// plane VAO
-	unsigned int planeVAO, planeVBO;
 	glGenVertexArrays(1, &planeVAO);
 	glGenBuffers(1, &planeVBO);
 	glBindVertexArray(planeVAO);
@@ -309,6 +320,28 @@ int main()
 	Shader screenShader("Shaders/ScreenQuadPostProcess.vert", "Shaders/ScreenQuadPostProcess.frag");
 	screenShader.SetInt("screenTexture", 0);
 
+	// Generate shadow map frame buffer
+	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	unsigned int depthMapFBO;
+	glGenFramebuffers(1, &depthMapFBO);
+	// create depth texture
+	unsigned int depthMap;
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// attach depth texture as FBO's depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Shader lightingDepthShader("Shaders/lightDepthPass.vert", "Shaders/lightDepthPass.frag");
+
+
 	// Create cube map
 	std::vector<std::string> faces{
 		"../Assets//Skyboxes/Lake/right.jpg",
@@ -318,7 +351,7 @@ int main()
 		"../Assets//Skyboxes/Lake/front.jpg",
 		"../Assets//Skyboxes/Lake/back.jpg",
 	};
-	unsigned int cubemapTexture = loadCubeMap(faces);
+	cubemapTexture = loadCubeMap(faces);
 
 
 	// Compile shaders
@@ -340,11 +373,11 @@ int main()
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projectionMat));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	
-	unsigned int floorTexture = loadTexture("../Assets/Textures/wood.png", false);
-	unsigned int floorTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Diff.png", true);
-	unsigned int floorSpecTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Spec.png", true);
+	floorTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Diff.png", true);
+	floorSpecTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Spec.png", true);
 
-	Model model("../Assets/Models/nanosuit/nanosuit.obj");
+	model.Init("../Assets/Models/nanosuit/nanosuit.obj");
+	//model.Init("../Assets/Models/sponza/sponza.obj");
 	Model light("../Assets/Models/Primatives/Cube.obj");
 
 	pointLight.ambient = glm::vec3(0.05f);
@@ -363,8 +396,9 @@ int main()
 	float vignetteOuterRadius = 1.0f;
 	float vignetteOpacity = 1.0f;
 
-	float delta = 64.0f;
-	
+	camera.Position = glm::vec3(-2.0f, 4.0f, 1.0f);
+	glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
+
 	while (!glfwWindowShouldClose(pWindow))
 	{
 		float currentTime = static_cast<float>(glfwGetTime());
@@ -373,17 +407,47 @@ int main()
 
 		ProcessInput(pWindow);
 
-		// First pass
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		IMGUI_NEW_FRAME;
+		
+		ImGui::Begin("Light Pos");
+		{
+			ImGui::DragFloat3("Light Position", &lightPos.x, 0.1f, -100.0f, 100.0f);
+		}
+		ImGui::End();
+		// Shadow Pass
+		glm::mat4 lightProjection, lightView;
+		glm::mat4 lightSpaceMatrix;
+		float near_plane = 1.0f, far_plane = 7.5f;
+		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		lightSpaceMatrix = lightProjection * lightView;
+		// render scene from light's point of view
+		lightingDepthShader.Use();
+		lightingDepthShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, floorTextureGammaCorrected);
+		RenderScene(lightingDepthShader);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+		// Color pass
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glViewport(0, 0, g_windowWidth, g_windowHeight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+
+		glViewport(0, 0, g_windowWidth, g_windowHeight);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// view transformations
 		glm::mat4 viewMat = camera.GetViewMatrix();
@@ -402,33 +466,18 @@ int main()
 		lightingShader.SetPointLight("pointLights[0]", pointLight);
 		lightingShader.SetDirectionalLight("dirLight", dirLight);
 		lightingShader.SetSpotLight("spotLight", spotLight);
-
-		// render the loaded model
-		glm::mat4 modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -1.75f, 0.0f));
-		//modelMat = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));
-		lightingShader.SetMat4("model", modelMat);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		model.Draw(lightingShader);
-
-		// floor
-		glm::mat4 floorMat = glm::mat4(1.0f);
-		floorMat = glm::scale(floorMat, glm::vec3(2.0f));
-		floorMat = glm::rotate(floorMat, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		floorMat = glm::translate(floorMat, glm::vec3(0.0f, 1.5f, 0.0f));
-		ImGui::Begin("Material shininess");
-		{
-			ImGui::DragFloat("Shininess", &delta, 1.0f, 0.0f, 200.0f);
-			lightingShader.SetFloat("material.shininess", delta);
-		}
-		ImGui::End();
-		lightingShader.SetMat4("model", floorMat);
-		glBindVertexArray(planeVAO);
+		lightingShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+		lightingShader.SetInt("material.texture_diffuse1", 0);
+		lightingShader.SetInt("material.texture_specular1", 1);
+		lightingShader.SetInt("shadowMap", 2);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, floorTextureGammaCorrected);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, floorSpecTextureGammaCorrected);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		RenderScene(lightingShader);
+
 
 		// Draw skybox
 		glDepthFunc(GL_LEQUAL);
@@ -442,20 +491,14 @@ int main()
 		glBindVertexArray(0);
 		glDepthFunc(GL_LESS);
 
-		// Render GPU geometry
-		//geometryShader.Use();
-		//glBindVertexArray(geometryVAO);
-		//glDrawArrays(GL_POINTS, 0, 4);
-
-		// Second (PostProcess) pass
+		// PostProcess pass
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
 		glBlitFramebuffer(0, 0, g_windowWidth, g_windowHeight, 0, 0, g_windowWidth, g_windowHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glDisable(GL_DEPTH_TEST);
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		//glDisable(GL_DEPTH_TEST);
+		/*glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);*/
 
 		screenShader.Use();
 		screenShader.SetFloat("time", (float)glfwGetTime());
@@ -468,7 +511,7 @@ int main()
 
 			ImGui::Text("Vignette");
 			ImGui::Checkbox("VN Enabled", &vignetteEnabled);
-			ImGui::DragFloat("Inner Radius", &vignetteInnerRadius, 0.1f, 0.0f, 10.0f);
+			ImGui::DragFloat("Inner Radius", &vignetteInnerRadius, 0.1f, 0.0f, 1.0f);
 			ImGui::DragFloat("Outer Radius", &vignetteOuterRadius, 0.1f, 0.0f, 10.0f);
 			ImGui::DragFloat("Opacity", &vignetteOpacity, 0.1f, 0.0f, 10.0f);
 		}
@@ -482,6 +525,9 @@ int main()
 		screenShader.SetFloat("vignetteOuterRadius", vignetteOuterRadius);
 		screenShader.SetFloat("vignetteOpacity", vignetteOpacity);
 		
+		screenShader.SetFloat("near_plane", near_plane);
+		screenShader.SetFloat("far_plane", far_plane);
+
 		glBindVertexArray(quadVAO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, screenTexture);
@@ -503,6 +549,118 @@ int main()
 
 	glfwTerminate();
 	return 0;
+}
+
+void RenderScene(const Shader& shader)
+{
+	// floor
+	glm::mat4 floorMat = glm::mat4(1.0f);
+	//floorMat = glm::scale(floorMat, glm::vec3(2.0f));
+	floorMat = glm::rotate(floorMat, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	floorMat = glm::translate(floorMat, glm::vec3(0.0f, 1.5f, 0.0f));
+	shader.SetMat4("model", floorMat);
+	glBindVertexArray(planeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	// cubes
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
+	model = glm::scale(model, glm::vec3(0.5f));
+	shader.SetMat4("model", model);
+	renderCube();
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(2.0f, 0.0f, 1.0));
+	model = glm::scale(model, glm::vec3(0.5f));
+	shader.SetMat4("model", model);
+	renderCube();
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 2.0));
+	model = glm::rotate(model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+	model = glm::scale(model, glm::vec3(0.25));
+	shader.SetMat4("model", model);
+	renderCube();
+
+	// render the loaded model
+	//glm::mat4 modelMat = glm::mat4(1.0f);
+	//modelMat = glm::translate(modelMat, glm::vec3(0.0f, -1.75f, 0.0f));
+	//shader.SetMat4("model", modelMat);
+	//glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	//model.Draw(shader);
+
+}
+
+unsigned int cubeVAO = 0;
+unsigned int cubeVBO = 0;
+void renderCube()
+{
+	// initialize (if necessary)
+	if (cubeVAO == 0)
+	{
+		float vertices[] = {
+			// back face
+			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+			 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+			 1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+			 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+			-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+			// front face
+			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+			 1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+			-1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+			// left face
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+			-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+			// right face
+			 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+			 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+			 1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
+			 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+			 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+			 1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
+			// bottom face
+			-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+			 1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+			 1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+			 1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+			-1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+			-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+			// top face
+			-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+			 1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+			 1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
+			 1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+			-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+			-1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+		};
+		glGenVertexArrays(1, &cubeVAO);
+		glGenBuffers(1, &cubeVBO);
+		// fill buffer
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		// link vertex attributes
+		glBindVertexArray(cubeVAO);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+	// render Cube
+	glBindVertexArray(cubeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
 }
 
 unsigned int loadTexture(char const * path, bool gammaCorrection)

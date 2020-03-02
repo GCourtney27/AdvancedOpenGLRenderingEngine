@@ -121,6 +121,8 @@
     <None Include="Shaders\lamp.frag" />
     <None Include="Shaders\lamp.vert" />
     <None Include="Shaders\FragmentShader.frag" />
+    <None Include="Shaders\lightDepthPass.frag" />
+    <None Include="Shaders\lightDepthPass.vert" />
     <None Include="Shaders\ModelLoading.frag" />
     <None Include="Shaders\ModelLoading.vert" />
     <None Include="Shaders\ScreenQuadPostProcess.vert" />

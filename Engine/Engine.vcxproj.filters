@@ -125,6 +125,12 @@
     <None Include="Shaders\GPUGeometry.geom">
       <Filter>Resources\Shaders</Filter>
     </None>
+    <None Include="Shaders\lightDepthPass.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Shaders\lightDepthPass.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">

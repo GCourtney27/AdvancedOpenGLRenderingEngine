@@ -2,6 +2,17 @@
 
 Shader::Shader(const char * vertexPath, const char * fragmentPath, const char * geometryPath)
 {
+	LoadAndCompile(vertexPath, fragmentPath, geometryPath);
+
+}
+
+void Shader::Init(const char * vertexPath, const char * fragmentPath, const char * geometryPath)
+{
+	LoadAndCompile(vertexPath, fragmentPath, geometryPath);
+}
+
+void Shader::LoadAndCompile(const char * vertexPath, const char * fragmentPath, const char * geometryPath)
+{
 	// 1. Retrieve the vertex/fragment information source code from filepath
 	std::string vertexCode;
 	std::string fragmentCode;
@@ -42,7 +53,7 @@ Shader::Shader(const char * vertexPath, const char * fragmentPath, const char * 
 	catch (std::ifstream::failure e)
 	{
 		std::cout << "Error::Shader::Failed to read shader from file: " << e.what() << "\n";
-		
+
 	}
 	const char * vertShaderCode = vertexCode.c_str();
 	const char * fragShaderCode = fragmentCode.c_str();
@@ -105,7 +116,6 @@ Shader::Shader(const char * vertexPath, const char * fragmentPath, const char * 
 	glDeleteShader(fragment);
 	if (geometryPath != "")
 		glDeleteShader(geometry);
-
 }
 
 Shader::~Shader()

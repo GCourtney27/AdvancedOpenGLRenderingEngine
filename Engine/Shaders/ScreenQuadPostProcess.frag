@@ -29,8 +29,22 @@ vec4 GetTextureColor();
 vec4 AddVignette(vec4 sourceColor);
 vec4 AddFilmGrain(vec4 sourceColor);
 
+uniform float near_plane;
+uniform float far_plane;
+
+float LinearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // Back to NDC 
+    return (2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));	
+}
+
 void main()
 {
+//	float depthValue = texture(screenTexture, fs_in.TexCoords).r;
+//	FragColor = vec4(vec3(depthValue), 1.0);
+////	FragColor = vec4(vec3(LinearizeDepth(depthValue) / far_plane), 1.0);
+//	return;
+
 	vec4 texColor = GetTextureColor();
 
 	vec4 result = texColor;
@@ -38,6 +52,7 @@ void main()
 	result = AddFilmGrain(result) * filmgrainEnabled + result * (1 - filmgrainEnabled);
 	result = AddVignette(result) * vignetteEnabled + result * (1 - vignetteEnabled);
 	
+
 	FragColor = result;
 	return;
 

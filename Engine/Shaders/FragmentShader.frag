@@ -6,6 +6,7 @@ in VS_OUT
 	vec3 FragPos;
 	vec2 TexCoords;
 	vec3 Normal;
+	vec4 FragPosLightSpace;
 } fs_in;
 
 struct Material
@@ -61,37 +62,45 @@ uniform Material material;
 
 uniform vec3 viewPos;
 uniform samplerCube skybox;
+uniform sampler2D shadowMap;
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDirection);
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPosition, vec3 viewDirection);
 vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+float ShadowCalculation(vec4 fragPosLightSpace);
 
 void main()
 {
 	vec3 normal = normalize(fs_in.Normal);
 	vec3 viewDirection = normalize(viewPos - fs_in.FragPos);
-	vec3 result;// = CalculateDirectionalLight(dirLight, normal, viewDirection);
+	vec3 result = CalculateDirectionalLight(dirLight, normal, viewDirection);
 
 	for(int i = 0; i < NUM_POINT_LIGHTS; i++)
 	{
-		result += CalculatePointLight(pointLights[i], normal, fs_in.FragPos, viewDirection);
+		//result += CalculatePointLight(pointLights[i], normal, fs_in.FragPos, viewDirection);
     }    
 
 	//result += CalculateSpotLight(spotLight, normal, fs_in.FragPos, viewDirection);
 
-	// Reflection
-//	vec3 I = normalize(fs_in.FragPos - viewPos);
-//	vec3 R = reflect(I, normalize(fs_in.Normal));
-//	result += texture(skybox, R).rgb;
-
-	// Refraction
-//	float ratio = 1.0 / 1.52;
-//	vec3 I = normalize(fs_in.FragPos - viewPos);
-//	vec3 R = refract(I, normalize(fs_in.Normal), ratio);
-//	result += texture(skybox, R).rgb;
 
 	float gamma = 2.2;
 	FragColor.rgb = pow(result.rgb, vec3(1.0/gamma));
+}
+
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // check whether current frag pos is in shadow
+    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+
+    return shadow;
 }
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDirection)
@@ -106,7 +115,11 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
     vec3 ambient = light.ambient * vec3(texture(material.texture_diffuse1, fs_in.TexCoords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(material.texture_diffuse1, fs_in.TexCoords));
     vec3 specular = light.specular * spec * vec3(texture(material.texture_specular1, fs_in.TexCoords));
-    return (ambient + diffuse + specular);
+
+	float shadow = ShadowCalculation(fs_in.FragPosLightSpace);
+	vec3 result = (ambient + (1.0 - shadow) * (diffuse + specular)) * light.diffuse;  
+
+    return result;
 }
 
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPosition, vec3 viewDirection)
