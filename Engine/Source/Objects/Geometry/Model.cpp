@@ -96,6 +96,8 @@ Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		std::vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+		std::vector<Texture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 	}
 	return Mesh(verticies, indices, textures);
 }
@@ -120,7 +122,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial * mat, aiTextureType
 		if (!skip)
 		{
 			Texture texture;
-			texture.id = Texture::TextureFromFile(str.C_Str(), directory, false);
+			texture.id = Texture::TextureFromFile(str.C_Str(), directory, true);
 			texture.type = typeName;
 			texture.path = str.C_Str();
 			textures.push_back(texture);

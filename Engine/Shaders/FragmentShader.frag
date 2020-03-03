@@ -13,6 +13,7 @@ struct Material
 {
 	sampler2D texture_diffuse1;
 	sampler2D texture_specular1;
+	sampler2D texture_normal1;
 	float shininess;
 };
 
@@ -71,7 +72,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDirection
 
 void main()
 {
-	vec3 normal = normalize(fs_in.Normal);
+	vec3 normal = texture(material.texture_normal1, fs_in.TexCoords).rgb;
+	normal = normalize(normal * 2.0 - 1.0);
 	vec3 viewDirection = normalize(viewPos - fs_in.FragPos);
 	vec3 result = CalculateDirectionalLight(dirLight, normal, viewDirection);
 
@@ -82,9 +84,8 @@ void main()
 
 	//result += CalculateSpotLight(spotLight, normal, fs_in.FragPos, viewDirection);
 
-
 	float gamma = 2.2;
-	FragColor.rgb = pow(result.rgb, vec3(1.0/gamma));
+	FragColor = vec4(pow(result.rgb, vec3(1.0/gamma)), 1.0);
 }
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDirection)

@@ -111,6 +111,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 unsigned int planeVAO, planeVBO;
 unsigned int floorTextureGammaCorrected;
 unsigned int floorSpecTextureGammaCorrected;
+unsigned int floorNormTextureGammaCorrected;
 unsigned int cubemapTexture;
 Model fileModel;
 
@@ -135,6 +136,7 @@ unsigned int loadCubeMap(std::vector<std::string> faces);
 void ProcessInput(GLFWwindow* pWindow);
 void RenderScene(const Shader& shader);
 void renderCube();
+void CleanUp();
 
 int main()
 {
@@ -319,6 +321,7 @@ int main()
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	
 	floorTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Diff.png", true);
+	floorNormTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Norm.png", true);
 	floorSpecTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Spec.png", true);
 
 	fileModel.Init("../Assets/Models/nanosuit/nanosuit.obj");
@@ -340,7 +343,7 @@ int main()
 	float vignetteOpacity = 1.0f;
 
 	float near_plane = 1.0f, far_plane = 27.5f;
-	camera.Position = glm::vec3(-2.0f, 4.0f, 1.0f);
+	camera.Position = glm::vec3(0.0f, 4.0f, 10.0f);
 	glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
 
 	glEnable(GL_CULL_FACE);
@@ -383,7 +386,7 @@ int main()
 			glEnable(GL_CULL_FACE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		ImGui::Begin("Shadow Depth Pre-Pass Result");
+		ImGui::Begin("Shadow Depth Pass Result");
 		{
 			ImGui::GetWindowDrawList()->AddImage(
 				(void *)depthMap,
@@ -416,15 +419,23 @@ int main()
 		lightingShader.SetDirectionalLight("dirLight", dirLight);
 		lightingShader.SetSpotLight("spotLight", spotLight);
 		lightingShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
 		lightingShader.SetInt("material.texture_diffuse1", 0);
 		lightingShader.SetInt("material.texture_specular1", 1);
-		lightingShader.SetInt("shadowMap", 2);
+		lightingShader.SetInt("material.texture_normal1", 2);
+		lightingShader.SetInt("shadowMap", 3);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, floorTextureGammaCorrected);
+
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, floorSpecTextureGammaCorrected);
+		
 		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, floorTextureGammaCorrected);
+		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
+		lightingShader.SetFloat("material.shininess", 32.0f);
+
 		RenderScene(lightingShader);
 		
 		// Draw skybox
@@ -483,7 +494,6 @@ int main()
 	glDeleteVertexArrays(1, &skyboxVAO);
 	glDeleteVertexArrays(1, &geometryVAO);
 	glDeleteVertexArrays(1, &planeVAO);
-	glDeleteVertexArrays(1, &cubeVAO);
 	glDeleteFramebuffers(sizeof(intermediateFBO), &intermediateFBO);
 	glDeleteFramebuffers(sizeof(frameBuffer), &frameBuffer);
 	glDeleteRenderbuffers(sizeof(rbo), &rbo);
@@ -538,6 +548,7 @@ void RenderScene(const Shader& shader)
 
 	// render the loaded model
 	glm::mat4 modelMat = glm::mat4(1.0f);
+	//modelMat = glm::scale(modelMat, glm::vec3(0.01f));
 	modelMat = glm::scale(modelMat, glm::vec3(0.5f));
 	modelMat = glm::translate(modelMat, glm::vec3(0.0f, -1.75f, -2.0f));
 	shader.SetMat4("model", modelMat);
