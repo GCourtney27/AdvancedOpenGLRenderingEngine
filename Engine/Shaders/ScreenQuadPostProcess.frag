@@ -28,81 +28,37 @@ vec4 GetTextureColor();
 
 vec4 AddVignette(vec4 sourceColor);
 vec4 AddFilmGrain(vec4 sourceColor);
+float LinearizeDepth(float depth);
 
 uniform float near_plane;
 uniform float far_plane;
-
-float LinearizeDepth(float depth)
-{
-    float z = depth * 2.0 - 1.0; // Back to NDC 
-    return (2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));	
-}
 
 void main()
 {
 //	float depthValue = texture(screenTexture, fs_in.TexCoords).r;
 //	FragColor = vec4(vec3(depthValue), 1.0);
-////	FragColor = vec4(vec3(LinearizeDepth(depthValue) / far_plane), 1.0);
+////	FragColor = vec4(vec3(LinearizeDepth(depthValue) / far_plane), 1.0); // Use for perspective matrix generated depth textures
 //	return;
 
 	vec4 texColor = GetTextureColor();
 
 	vec4 result = texColor;
-	// Simple arithmetic logic gate to replace if statements. GPUs dont like breaking control flow with ifs
 	result = AddFilmGrain(result) * filmgrainEnabled + result * (1 - filmgrainEnabled);
 	result = AddVignette(result) * vignetteEnabled + result * (1 - vignetteEnabled);
 	
 
 	FragColor = result;
-	return;
-
-	// Inverted colors
-//	FragColor = vec4(vec3(1.0 - texture(screenTexture, fs_in.TexCoords)), 1.0);
-
-	// Grey Scale
-//	FragColor = texture(screenTexture, fs_in.TexCoords);
-//	float average = (0.2126 * FragColor.r + 0.7152 * FragColor.g + 0.0722 * FragColor.g) / 3.0;
-//	FragColor = vec4(average, average, average, 1.0);
-
-	// Kernal effects
-	vec2 offsets[9] = vec2[](
-        vec2(-offset,  offset), // top-left
-        vec2( 0.0f,    offset), // top-center
-        vec2( offset,  offset), // top-right
-        vec2(-offset,  0.0f),   // center-left
-        vec2( 0.0f,    0.0f),   // center-center
-        vec2( offset,  0.0f),   // center-right
-        vec2(-offset, -offset), // bottom-left
-        vec2( 0.0f,   -offset), // bottom-center
-        vec2( offset, -offset)  // bottom-right    
-    );
-	// Sharpen
-//	float kernal[9] = float[](
-//		-1, -1,  -1, 
-//		-1,  9,  -1, 
-//		-1, -1,  -1
-//	);
-	// Blur
-	float kernal[9] = float[](
-		1.0 / 16, 2.0 / 16, 1.0 / 16,
-		2.0 / 16, 4.0 / 16, 2.0 / 16,
-		1.0 / 16, 2.0 / 16, 1.0 / 16  
-	);
-	vec3 sampleTex[9];
-	for(int i = 0; i < 9; i++)
-	{
-		sampleTex[i] = vec3(texture(screenTexture, fs_in.TexCoords.st + offsets[i]));
-	}
-	vec3 col = vec3(0.0);
-	for(int i = 0; i < 9; i++)
-		col += sampleTex[i] * kernal[i];
-
-	FragColor = vec4(col, 1.0);
 }
 
 vec4 GetTextureColor()
 {
 	return texture(screenTexture, fs_in.TexCoords);
+}
+
+float LinearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // Back to Normalized Device Coordinates
+    return (2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));	
 }
 
 vec4 AddFilmGrain(vec4 sourceColor)
