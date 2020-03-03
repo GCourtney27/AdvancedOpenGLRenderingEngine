@@ -12,7 +12,7 @@ public:
 	std::vector<Texture> textures;
 
 	Mesh(std::vector<Vertex> verticies, std::vector<unsigned int> indicies, std::vector<Texture> textures);
-	void Draw(Shader& shader);
+	void Draw(const Shader& shader);
 	void Destroy();
 
 private:

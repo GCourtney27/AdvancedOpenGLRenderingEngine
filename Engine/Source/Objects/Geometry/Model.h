@@ -8,8 +8,10 @@ class Model
 {
 public:
 	Model(const std::string& path);
+	Model() {}
+	void Init(const std::string& path);
 	
-	void Draw(Shader shader);
+	void Draw(const Shader& shader);
 	void Destroy();
 
 private:

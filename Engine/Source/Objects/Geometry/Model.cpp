@@ -6,7 +6,12 @@ Model::Model(const std::string & path)
 
 }
 
-void Model::Draw(Shader shader)
+void Model::Init(const std::string& path)
+{
+	LoadModel(path);
+}
+
+void Model::Draw(const Shader& shader)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 		meshes[i].Draw(shader);

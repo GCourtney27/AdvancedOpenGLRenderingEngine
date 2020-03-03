@@ -9,17 +9,23 @@ out VS_OUT
 	vec3 FragPos;  // Position in world space
 	vec2 TexCoords;
 	vec3 Normal;
+	vec4 FragPosLightSpace;
 } vs_out;
 
+layout (std140) uniform Matrices 
+{
+	mat4 projection;
+	mat4 view;
+};
+
+uniform mat4 lightSpaceMatrix;
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
 void main()
 {
    vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
    vs_out.Normal = mat3(transpose(inverse(model))) * aNormal;
    vs_out.TexCoords = aTexCoords;
-
-   gl_Position = projection * view * vec4(vs_out.FragPos, 1.0);
+   vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
+   gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

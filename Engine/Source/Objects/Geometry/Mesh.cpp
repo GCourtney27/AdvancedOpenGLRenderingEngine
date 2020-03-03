@@ -37,7 +37,7 @@ void Mesh::SetupMesh()
 
 }
 
-void Mesh::Draw(Shader& shader)
+void Mesh::Draw(const Shader& shader)
 {
 	// Set texture uniforms
 	unsigned int diffuseNr = 1;
