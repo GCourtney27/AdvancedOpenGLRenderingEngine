@@ -5,8 +5,8 @@ in VS_OUT
 {
 	vec3 FragPos;
 	vec2 TexCoords;
-	vec3 Normal;
 	vec4 FragPosLightSpace;
+	mat3 TBN;
 } fs_in;
 
 struct Material
@@ -55,16 +55,23 @@ struct PointLight
 	vec3 specular;
 };
 
+
+uniform Material material;
+uniform vec3 viewPos;
+//uniform vec3 lightPos;
+
+// Lights
+// ------
 uniform DirectionalLight dirLight;
 #define NUM_POINT_LIGHTS 1
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
 uniform SpotLight spotLight;
-uniform Material material;
 
-uniform vec3 viewPos;
 uniform samplerCube skybox;
 uniform sampler2D shadowMap;
 
+// Method signatures
+// -----------------
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDirection);
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPosition, vec3 viewDirection);
 vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
@@ -74,8 +81,11 @@ void main()
 {
 	vec3 normal = texture(material.texture_normal1, fs_in.TexCoords).rgb;
 	normal = normalize(normal * 2.0 - 1.0);
+	normal = normalize(fs_in.TBN * normal);
+
+
 	vec3 viewDirection = normalize(viewPos - fs_in.FragPos);
-	vec3 result = CalculateDirectionalLight(dirLight, normal, viewDirection);
+	vec3 result;// = CalculateDirectionalLight(dirLight, normal, viewDirection);
 
 	for(int i = 0; i < NUM_POINT_LIGHTS; i++)
 	{
@@ -152,7 +162,7 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPosition, vec3 
     // specular shading
     float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
     // attenuation
-    float distance = length(light.position - fs_in.FragPos);
+    float distance = length(light.position - fragPosition);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
     // combine results
     vec3 ambient = light.ambient * vec3(texture(material.texture_diffuse1, fs_in.TexCoords));
