@@ -113,6 +113,7 @@ unsigned int floorSpecTextureGammaCorrected;
 unsigned int floorNormTextureGammaCorrected;
 unsigned int brickDiffTextureGammaCorrected;
 unsigned int brickNormalTextureGammaCorrected;
+unsigned int brickDepthTextureGammaCorrected;
 unsigned int cubemapTexture;
 
 // Mouse
@@ -262,9 +263,9 @@ int main()
 	unsigned int depthMapFBO;
 	glGenFramebuffers(1, &depthMapFBO);
 	// create depth texture
-	unsigned int depthMap;
-	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
+	unsigned int shadowMap;
+	glGenTextures(1, &shadowMap);
+	glBindTexture(GL_TEXTURE_2D, shadowMap);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -274,7 +275,7 @@ int main()
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	// attach depth texture as FBO's depth buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -313,8 +314,9 @@ int main()
 	floorDiffTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Diff.png", true);
 	floorNormTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Norm.png", false);
 	floorSpecTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Spec.png", true);
-	brickDiffTextureGammaCorrected = loadTexture("../Assets/Textures/brick_diff.png", true);
-	brickNormalTextureGammaCorrected = loadTexture("../Assets/Textures/brick_normal.png", false);
+	brickDiffTextureGammaCorrected = loadTexture("../Assets/Textures/bricks2_diff.jpg", true);
+	brickNormalTextureGammaCorrected = loadTexture("../Assets/Textures/bricks2_normal.jpg", false);
+	brickDepthTextureGammaCorrected = loadTexture("../Assets/Textures/bricks2_disp.jpg", false);
 
 	fileModel.Init("../Assets/Models/Dandelion/Textured_Flower.obj");
 	//fileModel.Init("../Assets/Models/Primatives/Cube.obj");
@@ -342,6 +344,8 @@ int main()
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+
+	float parallaxHeightScale = 0.1f;
 
 	while (!glfwWindowShouldClose(pWindow))
 	{
@@ -383,7 +387,7 @@ int main()
 		ImGui::Begin("Shadow Depth Pass Result");
 		{
 			ImGui::GetWindowDrawList()->AddImage(
-												(void *)depthMap,
+												(void *)shadowMap,
 												ImVec2(ImGui::GetCursorScreenPos()),
 												ImVec2(ImGui::GetCursorScreenPos().x + g_windowWidth / 2,
 														ImGui::GetCursorScreenPos().y + g_windowHeight / 2), ImVec2(0, 1), ImVec2(1, 0));
@@ -406,19 +410,26 @@ int main()
 		lightingShader.SetMat4("view", viewMat);
 		lightingShader.SetVec3("viewPos", camera.Position);
 
-		spotLight.position = glm::vec3(0.0f, -2.0f, 0.0f);
-		spotLight.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+		spotLight.position = camera.Position;
+		spotLight.direction = camera.Front;
 
 		lightingShader.SetPointLight("pointLights[0]", pointLight);
-		//lightingShader.SetVec3("lightPos", pointLight.position);
 		lightingShader.SetDirectionalLight("dirLight", dirLight);
 		lightingShader.SetSpotLight("spotLight", spotLight);
 		lightingShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+		ImGui::Begin("Parallax Amount");
+		{
+			ImGui::DragFloat("Amount", &parallaxHeightScale, 0.1, -1.0f, 1.0f);
+		}
+		ImGui::End();
+		lightingShader.SetFloat("height_scale", parallaxHeightScale);
 
 		lightingShader.SetInt("material.texture_diffuse1", 0);
 		lightingShader.SetInt("material.texture_specular1", 1);
 		lightingShader.SetInt("material.texture_normal1", 2);
 		lightingShader.SetInt("shadowMap", 3);
+		lightingShader.SetInt("depthMap", 4);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, brickDiffTextureGammaCorrected);
 		glActiveTexture(GL_TEXTURE1);
@@ -426,7 +437,9 @@ int main()
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, brickNormalTextureGammaCorrected);
 		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
+		glBindTexture(GL_TEXTURE_2D, shadowMap);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, brickDepthTextureGammaCorrected);
 		lightingShader.SetFloat("material.shininess", 32.0f);
 
 		RenderScene(lightingShader);
@@ -518,7 +531,9 @@ void RenderScene(const Shader& shader)
 		ImGui::DragFloat("Rot-x", &planeRot, 0.1f, -180.0f, 180.0f);
 	}
 	ImGui::End();
-	floorMat = glm::rotate(floorMat, glm::radians(planeRot) , glm::vec3(1.0, 0.0, 0.0));
+	floorMat = glm::translate(floorMat, glm::vec3(0.0f, -2.0f, 0.0f));
+	floorMat = glm::scale(floorMat, glm::vec3(20.0f));
+	//floorMat = glm::rotate(floorMat, glm::radians(planeRot) , glm::vec3(1.0, 0.0, 0.0));
 	shader.SetMat4("model", floorMat);
 	renderFloorQuad();
 
@@ -639,8 +654,6 @@ void renderFloorQuad()
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(6 * sizeof(float)));
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(8 * sizeof(float)));
-		//glEnableVertexAttribArray(4);
-		//glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(11 * sizeof(float)));
 	}
 	glBindVertexArray(floorQuadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -804,7 +817,7 @@ void ProcessInput(GLFWwindow* pWindow)
 
 	float camSpeedScale = 1.0f;
 	if (glfwGetKey(pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-		camSpeedScale = 3.0f;
+		camSpeedScale = 7.0f;
 
 	if (glfwGetKey(pWindow, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, g_deltaTime * camSpeedScale);
