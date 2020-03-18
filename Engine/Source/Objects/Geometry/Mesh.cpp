@@ -32,6 +32,9 @@ void Mesh::SetupMesh()
 	// Texture Coords
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+	//Tangents
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
 
 	glBindVertexArray(0);
 
@@ -42,6 +45,7 @@ void Mesh::Draw(const Shader& shader)
 	// Set texture uniforms
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
+	unsigned int normalrNr = 1;
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -51,8 +55,10 @@ void Mesh::Draw(const Shader& shader)
 			number = std::to_string(diffuseNr++);
 		else if (name == "texture_specular")
 			number = std::to_string(specularNr++);
+		else if (name == "texture_normal")
+			number = std::to_string(normalrNr++);
 
-		shader.SetFloat(("material." + name + number).c_str(), i);
+		shader.SetInt(("material." + name + number).c_str(), i);
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
 	shader.SetFloat("material.shininess", 32.0f);

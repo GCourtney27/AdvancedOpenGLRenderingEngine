@@ -26,13 +26,6 @@ int g_windowWidth = 1600;
 int g_windowHeight = 900;
 int g_msaaSamples = 4;
 
-float points[] = {
-	-0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
-	 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
-	 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
-	-0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
-};
-
 float skyboxVertices[] = {
 	// positions          
 
@@ -107,20 +100,30 @@ PointLight pointLight;
 SpotLight spotLight;
 DirectionalLight dirLight;
 
+// Objects
+//--------
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-unsigned int planeVAO, planeVBO;
-unsigned int floorTextureGammaCorrected;
-unsigned int floorSpecTextureGammaCorrected;
-unsigned int cubemapTexture;
 Model fileModel;
 
+// Buffers and Textures
+//---------------------
+unsigned int planeVAO, planeVBO;
+unsigned int floorDiffTextureGammaCorrected;
+unsigned int floorSpecTextureGammaCorrected;
+unsigned int floorNormTextureGammaCorrected;
+unsigned int brickDiffTextureGammaCorrected;
+unsigned int brickNormalTextureGammaCorrected;
+unsigned int brickDepthTextureGammaCorrected;
+unsigned int cubemapTexture;
+
+// Mouse
+//------
 float lastX = g_windowWidth / 2.0f;
 float lastY = g_windowHeight / 2.0f;
 bool g_firstMouse = true;
 
-bool gammaEnabled = false;
-bool gammaKeyPressed = false;
-
+// Time
+//-----
 float g_deltaTime = 0.0f; // Time between current frame and last frame
 float g_lastFrame = 0.0f; // Time of last frame
 
@@ -135,6 +138,8 @@ unsigned int loadCubeMap(std::vector<std::string> faces);
 void ProcessInput(GLFWwindow* pWindow);
 void RenderScene(const Shader& shader);
 void renderCube();
+void renderFloorQuad();
+void CleanUp();
 
 int main()
 {
@@ -186,18 +191,6 @@ int main()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-	// Geometry Shader VAO/VBO
-	unsigned int geometryVAO, geometryVBO;
-	glGenVertexArrays(1, &geometryVAO);
-	glGenBuffers(1, &geometryVBO);
-	glBindVertexArray(geometryVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, geometryVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
 
 	// Floor plane VAO
 	glGenVertexArrays(1, &planeVAO);
@@ -270,9 +263,9 @@ int main()
 	unsigned int depthMapFBO;
 	glGenFramebuffers(1, &depthMapFBO);
 	// create depth texture
-	unsigned int depthMap;
-	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
+	unsigned int shadowMap;
+	glGenTextures(1, &shadowMap);
+	glBindTexture(GL_TEXTURE_2D, shadowMap);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -282,7 +275,7 @@ int main()
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	// attach depth texture as FBO's depth buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -318,12 +311,18 @@ int main()
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projectionMat));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	
-	floorTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Diff.png", true);
+	floorDiffTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Diff.png", true);
+	floorNormTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Norm.png", false);
 	floorSpecTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Spec.png", true);
+	brickDiffTextureGammaCorrected = loadTexture("../Assets/Textures/bricks2_diff.jpg", true);
+	brickNormalTextureGammaCorrected = loadTexture("../Assets/Textures/bricks2_normal.jpg", false);
+	brickDepthTextureGammaCorrected = loadTexture("../Assets/Textures/bricks2_disp.jpg", false);
 
-	fileModel.Init("../Assets/Models/nanosuit/nanosuit.obj");
+	fileModel.Init("../Assets/Models/Dandelion/Textured_Flower.obj");
+	//fileModel.Init("../Assets/Models/Primatives/Cube.obj");
+	//fileModel.Init("../Assets/Models/nanosuit/nanosuit.obj");
 	//fileModel.Init("../Assets/Models/sponza/sponza.obj");
-	Model light("../Assets/Models/Primatives/Cube.obj");
+	//Model light("../Assets/Models/Primatives/Cube.obj");
 
 	pointLight.ambient = glm::vec3(0.05f);
 	pointLight.diffuse = glm::vec3(0.8f);
@@ -340,11 +339,13 @@ int main()
 	float vignetteOpacity = 1.0f;
 
 	float near_plane = 1.0f, far_plane = 27.5f;
-	camera.Position = glm::vec3(-2.0f, 4.0f, 1.0f);
+	camera.Position = glm::vec3(0.0f, 4.0f, 10.0f);
 	glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+
+	float parallaxHeightScale = 0.1f;
 
 	while (!glfwWindowShouldClose(pWindow))
 	{
@@ -383,13 +384,13 @@ int main()
 			glEnable(GL_CULL_FACE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		ImGui::Begin("Shadow Depth Pre-Pass Result");
+		ImGui::Begin("Shadow Depth Pass Result");
 		{
 			ImGui::GetWindowDrawList()->AddImage(
-				(void *)depthMap,
-				ImVec2(ImGui::GetCursorScreenPos()),
-				ImVec2(ImGui::GetCursorScreenPos().x + g_windowWidth / 2,
-					ImGui::GetCursorScreenPos().y + g_windowHeight / 2), ImVec2(0, 1), ImVec2(1, 0));
+												(void *)shadowMap,
+												ImVec2(ImGui::GetCursorScreenPos()),
+												ImVec2(ImGui::GetCursorScreenPos().x + g_windowWidth / 2,
+														ImGui::GetCursorScreenPos().y + g_windowHeight / 2), ImVec2(0, 1), ImVec2(1, 0));
 		}
 		ImGui::End();
 
@@ -409,22 +410,38 @@ int main()
 		lightingShader.SetMat4("view", viewMat);
 		lightingShader.SetVec3("viewPos", camera.Position);
 
-		spotLight.position = glm::vec3(0.0f, -2.0f, 0.0f);
-		spotLight.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+		spotLight.position = camera.Position;
+		spotLight.direction = camera.Front;
 
 		lightingShader.SetPointLight("pointLights[0]", pointLight);
 		lightingShader.SetDirectionalLight("dirLight", dirLight);
 		lightingShader.SetSpotLight("spotLight", spotLight);
 		lightingShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+		ImGui::Begin("Parallax Amount");
+		{
+			ImGui::DragFloat("Amount", &parallaxHeightScale, 0.1, -1.0f, 1.0f);
+		}
+		ImGui::End();
+		lightingShader.SetFloat("height_scale", parallaxHeightScale);
+
 		lightingShader.SetInt("material.texture_diffuse1", 0);
 		lightingShader.SetInt("material.texture_specular1", 1);
-		lightingShader.SetInt("shadowMap", 2);
+		lightingShader.SetInt("material.texture_normal1", 2);
+		lightingShader.SetInt("shadowMap", 3);
+		lightingShader.SetInt("depthMap", 4);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, floorTextureGammaCorrected);
+		glBindTexture(GL_TEXTURE_2D, brickDiffTextureGammaCorrected);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, floorSpecTextureGammaCorrected);
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
+		glBindTexture(GL_TEXTURE_2D, brickNormalTextureGammaCorrected);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, shadowMap);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, brickDepthTextureGammaCorrected);
+		lightingShader.SetFloat("material.shininess", 32.0f);
+
 		RenderScene(lightingShader);
 		
 		// Draw skybox
@@ -481,14 +498,12 @@ int main()
 
 	glDeleteVertexArrays(1, &quadVAO);
 	glDeleteVertexArrays(1, &skyboxVAO);
-	glDeleteVertexArrays(1, &geometryVAO);
 	glDeleteVertexArrays(1, &planeVAO);
-	glDeleteVertexArrays(1, &cubeVAO);
 	glDeleteFramebuffers(sizeof(intermediateFBO), &intermediateFBO);
 	glDeleteFramebuffers(sizeof(frameBuffer), &frameBuffer);
 	glDeleteRenderbuffers(sizeof(rbo), &rbo);
 	glDeleteTextures(sizeof(floorSpecTextureGammaCorrected), &floorSpecTextureGammaCorrected);
-	glDeleteTextures(sizeof(floorTextureGammaCorrected), &floorTextureGammaCorrected);
+	glDeleteTextures(sizeof(floorDiffTextureGammaCorrected), &floorDiffTextureGammaCorrected);
 
 	CleanUp();
 
@@ -506,19 +521,24 @@ void CleanUp()
 	glfwTerminate();
 }
 
+float planeRot = -90;
 void RenderScene(const Shader& shader)
 {
 	// floor
 	glm::mat4 floorMat = glm::mat4(1.0f);
-	//floorMat = glm::scale(floorMat, glm::vec3(0.5f));
-	floorMat = glm::rotate(floorMat, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	floorMat = glm::translate(floorMat, glm::vec3(0.0f, 1.5f, 0.0f));
+	ImGui::Begin("RotX");
+	{
+		ImGui::DragFloat("Rot-x", &planeRot, 0.1f, -180.0f, 180.0f);
+	}
+	ImGui::End();
+	floorMat = glm::translate(floorMat, glm::vec3(0.0f, -2.0f, 0.0f));
+	floorMat = glm::scale(floorMat, glm::vec3(20.0f));
+	//floorMat = glm::rotate(floorMat, glm::radians(planeRot) , glm::vec3(1.0, 0.0, 0.0));
 	shader.SetMat4("model", floorMat);
-	glBindVertexArray(planeVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	renderFloorQuad();
 
 	// cubes
-	glm::mat4 model = glm::mat4(1.0f);
+	/*glm::mat4 model = glm::mat4(1.0f);
 	model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
 	model = glm::scale(model, glm::vec3(0.5f));
@@ -534,16 +554,110 @@ void RenderScene(const Shader& shader)
 	model = glm::rotate(model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
 	model = glm::scale(model, glm::vec3(0.25));
 	shader.SetMat4("model", model);
-	renderCube();
+	renderCube();*/
 
 	// render the loaded model
 	glm::mat4 modelMat = glm::mat4(1.0f);
+	//modelMat = glm::scale(modelMat, glm::vec3(0.01f));
 	modelMat = glm::scale(modelMat, glm::vec3(0.5f));
 	modelMat = glm::translate(modelMat, glm::vec3(0.0f, -1.75f, -2.0f));
 	shader.SetMat4("model", modelMat);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 	fileModel.Draw(shader);
 
+}
+
+unsigned int floorQuadVAO = 0;
+unsigned int floorQuadVBO = 0;
+void renderFloorQuad()
+{
+	if (floorQuadVAO == 0)
+	{
+		// positions
+		glm::vec3 pos1(-1.0f, 1.0f, 0.0f);
+		glm::vec3 pos2(-1.0f, -1.0f, 0.0f);
+		glm::vec3 pos3(1.0f, -1.0f, 0.0f);
+		glm::vec3 pos4(1.0f, 1.0f, 0.0f);
+		// texture coordinates
+		glm::vec2 uv1(0.0f, 1.0f);
+		glm::vec2 uv2(0.0f, 0.0f);
+		glm::vec2 uv3(1.0f, 0.0f);
+		glm::vec2 uv4(1.0f, 1.0f);
+		// normal vector
+		glm::vec3 nm(0.0f, 0.0f, 1.0f);
+
+		// calculate tangent/bitangent vectors of both triangles
+		glm::vec3 tangent1, bitangent1;
+		glm::vec3 tangent2, bitangent2;
+		// triangle 1
+		// ----------
+		glm::vec3 edge1 = pos2 - pos1;
+		glm::vec3 edge2 = pos3 - pos1;
+		glm::vec2 deltaUV1 = uv2 - uv1;
+		glm::vec2 deltaUV2 = uv3 - uv1;
+
+		GLfloat f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+		tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+		tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+		tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+		tangent1 = glm::normalize(tangent1);
+
+		bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+		bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+		bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+		bitangent1 = glm::normalize(bitangent1);
+
+		// triangle 2
+		// ----------
+		edge1 = pos3 - pos1;
+		edge2 = pos4 - pos1;
+		deltaUV1 = uv3 - uv1;
+		deltaUV2 = uv4 - uv1;
+
+		f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+		tangent2.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+		tangent2.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+		tangent2.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+		tangent2 = glm::normalize(tangent2);
+
+
+		bitangent2.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+		bitangent2.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+		bitangent2.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+		bitangent2 = glm::normalize(bitangent2);
+
+
+		float quadVertices[] = {
+			// positions            // normal         // texcoords  // tangent                          // bitangent
+			pos1.x, pos1.y, pos1.z, nm.x, nm.y, nm.z, uv1.x, uv1.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+			pos2.x, pos2.y, pos2.z, nm.x, nm.y, nm.z, uv2.x, uv2.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+			pos3.x, pos3.y, pos3.z, nm.x, nm.y, nm.z, uv3.x, uv3.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+
+			pos1.x, pos1.y, pos1.z, nm.x, nm.y, nm.z, uv1.x, uv1.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
+			pos3.x, pos3.y, pos3.z, nm.x, nm.y, nm.z, uv3.x, uv3.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
+			pos4.x, pos4.y, pos4.z, nm.x, nm.y, nm.z, uv4.x, uv4.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z
+		};
+
+		// configure plane VAO
+		glGenVertexArrays(1, &floorQuadVAO);
+		glGenBuffers(1, &floorQuadVBO);
+		glBindVertexArray(floorQuadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, floorQuadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(8 * sizeof(float)));
+	}
+	glBindVertexArray(floorQuadVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
 }
 
 unsigned int cubeVAO = 0;
@@ -703,7 +817,7 @@ void ProcessInput(GLFWwindow* pWindow)
 
 	float camSpeedScale = 1.0f;
 	if (glfwGetKey(pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-		camSpeedScale = 3.0f;
+		camSpeedScale = 7.0f;
 
 	if (glfwGetKey(pWindow, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, g_deltaTime * camSpeedScale);
@@ -719,12 +833,6 @@ void ProcessInput(GLFWwindow* pWindow)
 		camera.ProcessKeyboard(DOWN, g_deltaTime * camSpeedScale);
 	if (glfwGetKey(pWindow, GLFW_KEY_C) == GLFW_PRESS)
 		pointLight.position = camera.Position;
-
-	if (glfwGetKey(pWindow, GLFW_KEY_SPACE) == GLFW_PRESS && !gammaKeyPressed)
-	{
-		gammaEnabled = !gammaEnabled;
-		gammaKeyPressed = true;
-	}
 
 }
 

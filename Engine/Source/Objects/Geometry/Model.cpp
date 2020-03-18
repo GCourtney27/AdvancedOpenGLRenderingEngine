@@ -3,7 +3,6 @@
 Model::Model(const std::string & path)
 {
 	LoadModel(path);
-
 }
 
 void Model::Init(const std::string& path)
@@ -20,7 +19,10 @@ void Model::Draw(const Shader& shader)
 void Model::LoadModel(std::string path)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(path, 
+												aiProcess_Triangulate | 
+												aiProcess_FlipUVs | 
+												aiProcess_CalcTangentSpace);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -64,13 +66,17 @@ Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 		vector.y = mesh->mNormals[i].y;
 		vector.z = mesh->mNormals[i].z;
 		vertex.Normal = vector;
-		// Texture Coords
+		// Texture Coords/Tangents
 		if (mesh->mTextureCoords[0])
 		{
 			glm::vec2 vec;
 			vec.x = mesh->mTextureCoords[0][i].x;
 			vec.y = mesh->mTextureCoords[0][i].y;
 			vertex.TexCoords = vec;
+			vector.x = mesh->mTangents[i].x;
+			vector.y = mesh->mTangents[i].y;
+			vector.z = mesh->mTangents[i].z;
+			vertex.Tangent = vector;
 		}
 		else
 		{
@@ -96,6 +102,8 @@ Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		std::vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+		std::vector<Texture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 	}
 	return Mesh(verticies, indices, textures);
 }
@@ -120,7 +128,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial * mat, aiTextureType
 		if (!skip)
 		{
 			Texture texture;
-			texture.id = Texture::TextureFromFile(str.C_Str(), directory, false);
+			texture.id = Texture::TextureFromFile(str.C_Str(), directory, true);
 			texture.type = typeName;
 			texture.path = str.C_Str();
 			textures.push_back(texture);
