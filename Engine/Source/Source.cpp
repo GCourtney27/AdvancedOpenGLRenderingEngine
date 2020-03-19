@@ -226,7 +226,7 @@ int main()
 	unsigned int textureColorBufferMultiSampled;
 	glGenTextures(1, &textureColorBufferMultiSampled);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureColorBufferMultiSampled);
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, g_msaaSamples, GL_RGB, g_windowWidth, g_windowHeight, GL_TRUE);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, g_msaaSamples, GL_RGBA16F, g_windowWidth, g_windowHeight, GL_TRUE);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, textureColorBufferMultiSampled, 0);
 	// Create render buffer
@@ -296,8 +296,7 @@ int main()
 	Shader lightingShader("Shaders/VertexShader.vert", "Shaders/FragmentShader.frag");
 	Shader lampShader("Shaders/lamp.vert", "Shaders/lamp.frag");
 	Shader skyboxShader("Shaders/Skybox.vert", "Shaders/Skybox.frag");
-	Shader geometryShader("Shaders/GPUGeometry.vert", "Shaders/GPUGeometry.frag", "Shaders/GPUGeometry.geom");
-
+	
 	unsigned int ubiLightingShader = glGetUniformBlockIndex(lightingShader.ProgramID, "Matrices");
 	glUniformBlockBinding(lightingShader.ProgramID, ubiLightingShader, 0);
 	unsigned int uboMatrices;
@@ -314,6 +313,7 @@ int main()
 	floorDiffTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Diff.png", true);
 	floorNormTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Norm.png", false);
 	floorSpecTextureGammaCorrected = loadTexture("../Assets/Textures/Planks_Spec.png", true);
+
 	brickDiffTextureGammaCorrected = loadTexture("../Assets/Textures/bricks2_diff.jpg", true);
 	brickNormalTextureGammaCorrected = loadTexture("../Assets/Textures/bricks2_normal.jpg", false);
 	brickDepthTextureGammaCorrected = loadTexture("../Assets/Textures/bricks2_disp.jpg", false);
@@ -475,6 +475,10 @@ int main()
 			ImGui::DragFloat("Inner Radius", &vignetteInnerRadius, 0.1f, 0.0f, 1.0f);
 			ImGui::DragFloat("Outer Radius", &vignetteOuterRadius, 0.1f, 0.0f, 10.0f);
 			ImGui::DragFloat("Opacity", &vignetteOpacity, 0.1f, 0.0f, 10.0f);
+
+			ImGui::Text("Camera");
+			ImGui::DragFloat("Exposure", &camera.Exposure, 0.1, 0.1, 1.0);
+
 		}
 		ImGui::End();
 		screenShader.SetFloat("filmgrainEnabled", filmGrainEnabled);
@@ -485,6 +489,7 @@ int main()
 		screenShader.SetFloat("vignetteOpacity", vignetteOpacity);
 		screenShader.SetFloat("near_plane", near_plane);
 		screenShader.SetFloat("far_plane", far_plane);
+		screenShader.SetFloat("exposure", camera.Exposure);
 		glBindVertexArray(quadVAO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, screenTexture);
@@ -526,11 +531,6 @@ void RenderScene(const Shader& shader)
 {
 	// floor
 	glm::mat4 floorMat = glm::mat4(1.0f);
-	ImGui::Begin("RotX");
-	{
-		ImGui::DragFloat("Rot-x", &planeRot, 0.1f, -180.0f, 180.0f);
-	}
-	ImGui::End();
 	floorMat = glm::translate(floorMat, glm::vec3(0.0f, -2.0f, 0.0f));
 	floorMat = glm::scale(floorMat, glm::vec3(20.0f));
 	//floorMat = glm::rotate(floorMat, glm::radians(planeRot) , glm::vec3(1.0, 0.0, 0.0));

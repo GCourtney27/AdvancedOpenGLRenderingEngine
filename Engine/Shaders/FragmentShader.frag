@@ -104,7 +104,8 @@ void main()
 //	result += CalculateSpotLight(spotLight, normal, fs_in.TangentFragPos, viewDirection);
 
 	float gamma = 2.2;
-	FragColor = vec4(pow(result.rgb, vec3(1.0/gamma)), 1.0);
+//	FragColor = vec4(pow(result.rgb, vec3(1.0/gamma)), 1.0);
+	FragColor = vec4(result, 1.0);
 }
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)

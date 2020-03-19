@@ -32,6 +32,7 @@ float LinearizeDepth(float depth);
 
 uniform float near_plane;
 uniform float far_plane;
+uniform float exposure;
 
 void main()
 {
@@ -46,8 +47,12 @@ void main()
 	result = AddFilmGrain(result) * filmgrainEnabled + result * (1 - filmgrainEnabled);
 	result = AddVignette(result) * vignetteEnabled + result * (1 - vignetteEnabled);
 	
+	const float gamma = 2.2;
+	
+	vec3 mapped = vec3(1.0) - exp(-result.rgb * exposure);
+	mapped = pow(mapped, vec3(1.0 / gamma));
 
-	FragColor = result;
+	FragColor = vec4(mapped, 1.0);
 }
 
 vec4 GetTextureColor()

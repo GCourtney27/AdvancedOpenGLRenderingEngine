@@ -21,6 +21,7 @@ const float PITCH = 0.0f;
 const float SPEED = 2.05f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
+const float EXPOSURE = 0.5f;
 
 class Camera
 {
@@ -38,13 +39,16 @@ public:
 	float MouseSensitivity;
 	float Zoom;
 
-	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH)
-		: Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+	float Exposure;
+
+	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH, float exposure = EXPOSURE)
+		: Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), Exposure(EXPOSURE)
 	{
 		Position = position;
 		WorldUp = up;
 		Yaw = yaw;
 		Pitch = pitch;
+		Exposure = exposure;
 		updateCameraVectors();
 	}
 
