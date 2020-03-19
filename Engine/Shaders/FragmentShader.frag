@@ -1,5 +1,6 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 #define NUM_POINT_LIGHTS 1
 
@@ -103,9 +104,14 @@ void main()
 
 //	result += CalculateSpotLight(spotLight, normal, fs_in.TangentFragPos, viewDirection);
 
-	float gamma = 2.2;
-//	FragColor = vec4(pow(result.rgb, vec3(1.0/gamma)), 1.0);
 	FragColor = vec4(result, 1.0);
+
+	float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 1.0)
+        BrightColor = vec4(FragColor.rgb, 1.0);
+    else
+        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+	
 }
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)

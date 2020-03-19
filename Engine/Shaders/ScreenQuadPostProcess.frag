@@ -7,6 +7,7 @@ in VS_OUT
 } fs_in;
 
 uniform sampler2D screenTexture;
+uniform sampler2D bloomTexture;
 
 const float offset = 1.0 / 300.0;
 
@@ -33,15 +34,15 @@ float LinearizeDepth(float depth);
 uniform float near_plane;
 uniform float far_plane;
 uniform float exposure;
+uniform bool bloomEnabled;
 
 void main()
 {
-//	float depthValue = texture(screenTexture, fs_in.TexCoords).r;
-//	FragColor = vec4(vec3(depthValue), 1.0);
-////	FragColor = vec4(vec3(LinearizeDepth(depthValue) / far_plane), 1.0); // Use for perspective matrix generated depth textures
-//	return;
 
 	vec4 texColor = GetTextureColor();
+	vec3 bloomColor = texture(bloomTexture, fs_in.TexCoords).rgb;
+	if(bloomEnabled)
+		texColor += vec4(bloomColor, 1.0);
 
 	vec4 result = texColor;
 	result = AddFilmGrain(result) * filmgrainEnabled + result * (1 - filmgrainEnabled);

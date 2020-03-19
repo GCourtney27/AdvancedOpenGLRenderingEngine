@@ -115,6 +115,7 @@
     <ClInclude Include="Vendor\stb\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\GaussianBlur.frag" />
     <None Include="Shaders\GPUGeometry.frag" />
     <None Include="Shaders\GPUGeometry.geom" />
     <None Include="Shaders\GPUGeometry.vert" />
