@@ -91,9 +91,9 @@ void main()
 	normal = normalize(normal * 2.0 - 1.0);
 	vec3 viewDirection = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
 
-	parallaxTexCoords = ParallaxMapping(fs_in.TexCoords, viewDirection);
-	if(parallaxTexCoords.x > 1.0 || parallaxTexCoords.y > 1.0 || parallaxTexCoords.x < 0.0 || parallaxTexCoords.y < 0.0)
-		discard;
+	parallaxTexCoords = fs_in.TexCoords;//ParallaxMapping(fs_in.TexCoords, viewDirection);
+	//if(parallaxTexCoords.x > 1.0 || parallaxTexCoords.y > 1.0 || parallaxTexCoords.x < 0.0 || parallaxTexCoords.y < 0.0)
+	//	discard;
 
 	vec3 result;// = CalculateDirectionalLight(dirLight, normal, viewDirection);
 
@@ -104,14 +104,12 @@ void main()
 
 //	result += CalculateSpotLight(spotLight, normal, fs_in.TangentFragPos, viewDirection);
 
-	FragColor = vec4(result, 1.0);
-
-	float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+	float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
     if(brightness > 1.0)
-        BrightColor = vec4(FragColor.rgb, 1.0);
+        BrightColor = vec4(result, 1.0);
     else
         BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
-	
+    FragColor = vec4(result, 1.0);
 }
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
