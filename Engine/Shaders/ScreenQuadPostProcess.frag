@@ -39,17 +39,17 @@ uniform bool bloomEnabled;
 void main()
 {
 
-	vec4 texColor = GetTextureColor();
+//	vec4 texColor = GetTextureColor();
+	vec3 texColor = texture(screenTexture, fs_in.TexCoords).rgb;
 	vec3 bloomColor = texture(bloomTexture, fs_in.TexCoords).rgb;
 	if(bloomEnabled)
 	{
-//		texColor += bloomColor;
-		texColor = vec4(bloomColor, 1.0);
+		texColor += bloomColor;
 	}
 
-	vec4 result = texColor;
-	result = AddFilmGrain(result) * filmgrainEnabled + result * (1 - filmgrainEnabled);
-	result = AddVignette(result) * vignetteEnabled + result * (1 - vignetteEnabled);
+	vec3 result = texColor;
+	//result = AddFilmGrain(result) * filmgrainEnabled + result * (1 - filmgrainEnabled);
+	//result = AddVignette(result) * vignetteEnabled + result * (1 - vignetteEnabled);
 	
 	const float gamma = 2.2;
 	

@@ -144,6 +144,7 @@ void InitSkybox(unsigned int & skyVAO, unsigned int & skyboxVBO);
 void ProcessInput(GLFWwindow* pWindow);
 void RenderScene(const Shader& shader);
 void renderCube();
+void renderQuad();
 void renderFloorQuad();
 void CleanUp();
 
@@ -237,21 +238,25 @@ int main()
 		std::cout << "Framebuffer not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	// Ping-pong framebuffers
+
+	// ping-pong-framebuffer for blurring
 	unsigned int pingpongFBO[2];
-	unsigned int pingpongBuffer[2];
+	unsigned int pingpongColorbuffers[2];
 	glGenFramebuffers(2, pingpongFBO);
-	glGenTextures(2, pingpongBuffer);
+	glGenTextures(2, pingpongColorbuffers);
 	for (unsigned int i = 0; i < 2; i++)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
-		glBindTexture(GL_TEXTURE_2D, pingpongBuffer[i]);
+		glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, g_windowWidth, g_windowHeight, 0, GL_RGB, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongBuffer[i], 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
+		// also check if framebuffers are complete (no need for depth buffer)
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "Framebuffer not complete!" << std::endl;
 	}
 	Shader screenShader("Shaders/ScreenQuadPostProcess.vert", "Shaders/ScreenQuadPostProcess.frag");
 	screenShader.SetInt("screenTexture", 0);
@@ -352,6 +357,8 @@ int main()
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
+	// Game Loop
+	//----------
 	while (!glfwWindowShouldClose(pWindow))
 	{
 		float currentTime = static_cast<float>(glfwGetTime());
@@ -360,44 +367,44 @@ int main()
 
 		ProcessInput(pWindow);
 
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		IMGUI_NEW_FRAME;
 		
-		ImGui::Begin("Light Camera");
-		{
-			ImGui::DragFloat3("Position", &lightPos.x, 0.1f, -100.0f, 100.0f);
-			ImGui::DragFloat("Near Plane", &near_plane, 0.1f, -50.0f, 100.0f);
-			ImGui::DragFloat("Far Plane", &far_plane, 0.1f, -50.0f, 100.0f);
-		}
-		ImGui::End();
-		// Shadow Depth Pre-Pass
-		glm::mat4 lightProjection, lightView;
-		glm::mat4 lightSpaceMatrix;
-		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-		lightSpaceMatrix = lightProjection * lightView;
-		lightingDepthShader.Use();
-		lightingDepthShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+		//ImGui::Begin("Light Camera");
+		//{
+		//	ImGui::DragFloat3("Position", &lightPos.x, 0.1f, -100.0f, 100.0f);
+		//	ImGui::DragFloat("Near Plane", &near_plane, 0.1f, -50.0f, 100.0f);
+		//	ImGui::DragFloat("Far Plane", &far_plane, 0.1f, -50.0f, 100.0f);
+		//}
+		//ImGui::End();
+		//// Shadow Depth Pre-Pass
+		//glm::mat4 lightProjection, lightView;
+		//glm::mat4 lightSpaceMatrix;
+		//lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+		//lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		//lightSpaceMatrix = lightProjection * lightView;
+		//lightingDepthShader.Use();
+		//lightingDepthShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glClear(GL_DEPTH_BUFFER_BIT);
-			glDisable(GL_CULL_FACE);
-			RenderScene(lightingDepthShader);
-			glEnable(GL_CULL_FACE);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		//glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		//glClear(GL_DEPTH_BUFFER_BIT);
+		//	glDisable(GL_CULL_FACE);
+		//	RenderScene(lightingDepthShader);
+		//	glEnable(GL_CULL_FACE);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		ImGui::Begin("Shadow Depth Pass Result");
-		{
-			ImGui::GetWindowDrawList()->AddImage(
-												(void *)shadowMap,
-												ImVec2(ImGui::GetCursorScreenPos()),
-												ImVec2(ImGui::GetCursorScreenPos().x + g_windowWidth / 2,
-														ImGui::GetCursorScreenPos().y + g_windowHeight / 2), ImVec2(0, 1), ImVec2(1, 0));
-		}
-		ImGui::End();
+		//ImGui::Begin("Shadow Depth Pass Result");
+		//{
+		//	ImGui::GetWindowDrawList()->AddImage(
+		//										(void *)shadowMap,
+		//										ImVec2(ImGui::GetCursorScreenPos()),
+		//										ImVec2(ImGui::GetCursorScreenPos().x + g_windowWidth / 2,
+		//												ImGui::GetCursorScreenPos().y + g_windowHeight / 2), ImVec2(0, 1), ImVec2(1, 0));
+		//}
+		//ImGui::End();
 
 		// Color pass
 		glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
@@ -418,10 +425,16 @@ int main()
 		spotLight.position = camera.Position;
 		spotLight.direction = camera.Front;
 
+		ImGui::Begin("Point light properties");
+		{
+			ImGui::DragFloat3("Color", &pointLight.diffuse.x, 0.1f, 0.0, 10.0f);
+		}
+		ImGui::End();
+
 		lightingShader.SetPointLight("pointLights[0]", pointLight);
 		lightingShader.SetDirectionalLight("dirLight", dirLight);
 		lightingShader.SetSpotLight("spotLight", spotLight);
-		lightingShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+		//lightingShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 		ImGui::Begin("Parallax Amount");
 		{
@@ -449,8 +462,18 @@ int main()
 
 		RenderScene(lightingShader);
 		
+		lampShader.Use();
+		lampShader.SetMat4("view", viewMat);
+		lampShader.SetMat4("projection", projectionMat);
+		glm::mat4 modelMat = glm::mat4(1.0f);
+		modelMat = glm::translate(modelMat, pointLight.position);
+		modelMat = glm::scale(modelMat, glm::vec3(1.25f));
+		lampShader.SetMat4("model", modelMat);
+		lampShader.SetVec3("color", pointLight.diffuse);
+		renderCube();
+
 		// Draw skybox
-		glDepthFunc(GL_LEQUAL);
+		/*glDepthFunc(GL_LEQUAL);
 		skyboxShader.Use();
 		glm::mat4 skyBoxViewMat = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 		skyboxShader.SetMat4("projection", projectionMat);
@@ -459,33 +482,35 @@ int main()
 		glActiveTexture(GL_TEXTURE0);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
-		glDepthFunc(GL_LESS);
+		glDepthFunc(GL_LESS);*/
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// Bloom two-pass gaussian blur
 		bool horizontal = true, first_iteration = true;
-		unsigned int bloomAmount = 10;
+		unsigned int amount = 10;
 		blurShader.Use();
-		for (unsigned int i = 0; i < bloomAmount; i++)
+		for (unsigned int i = 0; i < amount; i++)
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
 			blurShader.SetInt("horizontal", horizontal);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, first_iteration ? colorBuffers[1] : pingpongBuffer[!horizontal]);
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glBindTexture(
+				GL_TEXTURE_2D, first_iteration ? colorBuffers[1] : pingpongColorbuffers[!horizontal]
+			);
+			renderQuad();
 			horizontal = !horizontal;
 			if (first_iteration)
 				first_iteration = false;
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		// PostProcess pass
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, colorBuffers[0]);
-		glBlitFramebuffer(0, 0, g_windowWidth, g_windowHeight, 0, 0, g_windowWidth, g_windowHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		screenShader.Use();
+		screenShader.SetInt("screenTexture", 0);
+		screenShader.SetInt("bloomTexture", 1);
+		//glBlitFramebuffer(0, 0, g_windowWidth, g_windowHeight, 0, 0, g_windowWidth, g_windowHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		screenShader.SetFloat("time", (float)glfwGetTime());
 		ImGui::Begin("Post Processing");
 		{
@@ -507,25 +532,24 @@ int main()
 			ImGui::Checkbox("BLM Enabled", &bloomEnabled);
 		}
 		ImGui::End();
-		screenShader.SetFloat("filmgrainEnabled", filmGrainEnabled);
-		screenShader.SetFloat("grainStrength", filmgrainStrength);
-		screenShader.SetFloat("vignetteEnabled", vignetteEnabled);
-		screenShader.SetFloat("vignetteInnerRadius", vignetteInnerRadius);
-		screenShader.SetFloat("vignetteOuterRadius", vignetteOuterRadius);
-		screenShader.SetFloat("vignetteOpacity", vignetteOpacity);
-		screenShader.SetFloat("near_plane", near_plane);
-		screenShader.SetFloat("far_plane", far_plane);
-		screenShader.SetFloat("exposure", camera.Exposure);
-		screenShader.SetFloat("bloomEnabled", bloomEnabled);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+		{
+			screenShader.SetFloat("filmgrainEnabled", filmGrainEnabled);
+			screenShader.SetFloat("grainStrength", filmgrainStrength);
+			screenShader.SetFloat("vignetteEnabled", vignetteEnabled);
+			screenShader.SetFloat("vignetteInnerRadius", vignetteInnerRadius);
+			screenShader.SetFloat("vignetteOuterRadius", vignetteOuterRadius);
+			screenShader.SetFloat("vignetteOpacity", vignetteOpacity);
+			screenShader.SetFloat("near_plane", near_plane);
+			screenShader.SetFloat("far_plane", far_plane);
+			screenShader.SetFloat("exposure", camera.Exposure);
+			screenShader.SetFloat("bloomEnabled", bloomEnabled);
+		}
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, colorBuffers[0]);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, pingpongBuffer[horizontal]);
+		glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[!horizontal]);
 		
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		renderQuad();
 		
 		IMGUI_RENDER;
 
@@ -593,6 +617,35 @@ void RenderScene(const Shader& shader)
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 	fileModel.Draw(shader);
 
+}
+
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+	if (quadVAO == 0)
+	{
+		float quadVertices[] = {
+			// positions        // texture Coords
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	}
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
 }
 
 unsigned int floorQuadVAO = 0;
