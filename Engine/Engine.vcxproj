@@ -115,6 +115,10 @@
     <ClInclude Include="Vendor\stb\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="GeometryPass.frag" />
+    <None Include="GeometryPass.vert" />
+    <None Include="Shaders\DeferredRendering\LightingPass.frag" />
+    <None Include="Shaders\DeferredRendering\LightingPass.vert" />
     <None Include="Shaders\GaussianBlur.frag" />
     <None Include="Shaders\GPUGeometry.frag" />
     <None Include="Shaders\GPUGeometry.geom" />

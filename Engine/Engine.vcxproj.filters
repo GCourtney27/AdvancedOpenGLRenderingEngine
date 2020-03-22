@@ -134,6 +134,18 @@
     <None Include="Shaders\GaussianBlur.frag">
       <Filter>Resources\Shaders</Filter>
     </None>
+    <None Include="GeometryPass.frag">
+      <Filter>Resources\Shaders\DeferedRendering</Filter>
+    </None>
+    <None Include="GeometryPass.vert">
+      <Filter>Resources\Shaders\DeferedRendering</Filter>
+    </None>
+    <None Include="Shaders\DeferredRendering\LightingPass.vert">
+      <Filter>Resources\Shaders\DeferedRendering</Filter>
+    </None>
+    <None Include="Shaders\DeferredRendering\LightingPass.frag">
+      <Filter>Resources\Shaders\DeferedRendering</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -171,6 +183,9 @@
     </Filter>
     <Filter Include="Vendor\GLAD">
       <UniqueIdentifier>{5a68bcbb-8978-458a-b167-c67d4b1db395}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\DeferedRendering">
+      <UniqueIdentifier>{53c4bfb4-e230-45d6-a892-7149c7b8faa0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
